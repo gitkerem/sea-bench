@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sea bench · system 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Space+Mono:wght@400;700&family=Michroma&display=swap" rel="stylesheet">
+</head>
+<body>
+<canvas id="c" aria-label="Water column, FFT sea simulation"></canvas>
+
+<header class="hdr" aria-hidden="true">
+  <div class="meta">
+    <dl><dt>Prototype</dt><dd>001.A</dd><dt>System</dt><dd>01 · water column</dd><dt>Date</dt><dd>Nov 1, 2026</dd><dt>By</dt><dd>K &amp; Co</dd><dt>Engine</dt><dd>WebGPU · three r186</dd></dl>
+    <dl><dt>State</dt><dd class="red" id="vState">moderate sea</dd><dt>Hs</dt><dd id="vHs">0.40 m</dd><dt>Tp</dt><dd id="vTp">2.5 s</dd><dt><span style="text-transform:none">λ</span>p</dt><dd id="vLp">10 m</dd><dt>Steepness</dt><dd id="vSteep">1/25</dd></dl>
+    <dl><dt>Time</dt><dd id="vTime">T+00:00</dd><dt>Rate</dt><dd id="vFps">60 fps</dd><dt>Grid</dt><dd id="vGrid">128² · 3 cascades</dd><dt>Wind</dt><dd id="vWind">12 kn from E</dd><dt>Seed</dt><dd id="vSeed">1</dd></dl>
+  </div>
+</header>
+<div class="theme"><button type="button" id="bTheme" role="switch" aria-checked="false" aria-label="Dark mode"><span class="w">Light</span><span class="track"><span class="knob"></span></span></button></div>
+
+<div class="keys" aria-hidden="true"><div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>grid 1 m · heavy line 5 m<br>space pause · r new sea · drag to peek · scroll or pinch to zoom · double-click to reset</div>
+
+<aside class="panel" id="panel" aria-label="Sea controls">
+  <div class="body">
+  <section class="folder" id="fLight">
+    <button class="fh" type="button" aria-expanded="true">Light<svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></button>
+    <div class="fb"><div>
+      <div class="light">
+        <div class="tod" id="tod"><svg viewBox="0 0 128 128" aria-label="Time of day"><circle class="rim" cx="64" cy="64" r="60"/><text class="t" id="todT" x="64" y="66" text-anchor="middle">14:30</text><text class="d" id="todD" x="64" y="82" text-anchor="middle">sun 49°</text><circle class="sun" id="todDot" cx="64" cy="14.5" r="6"/></svg></div>
+        <div class="side"><button class="btn ico" type="button" id="bLight" title="Fine-tune the light" aria-label="Fine-tune the light" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h8M16 7h4M4 12h3M11 12h9M4 17h10M18 17h2"/><circle cx="14" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="16" cy="17" r="2"/></svg></button></div>
+      </div>
+    </div></div>
+  </section>
+  <section class="folder" id="fSea">
+    <button class="fh" type="button" aria-expanded="true">Wind sea <span class="c" id="seaTag">auto</span><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></button>
+    <div class="fb"><div>
+      <nav class="dots" id="segPreset" aria-label="Sea state presets">
+        <button type="button" data-p="calm">Calm</button><button type="button" data-p="moderate" aria-pressed="true">Moderate</button><button type="button" data-p="fresh">Fresh</button><button type="button" data-p="storm">Storm</button>
+      </nav>
+      <div id="slWind"></div><div id="slFrom"></div><div id="slFetch"></div><div id="slSpread"></div><div id="slGamma"></div><div id="slHeight"></div><div id="slRipple"></div>
+    </div></div>
+  </section>
+  <section class="folder" id="fSwell">
+    <button class="fh" type="button" aria-expanded="true">Swell<svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></button>
+    <div class="fb"><div>
+      <div id="slSwell"></div><div id="slSwellT"></div><div id="slSwellOff"></div>
+      <p class="hint">A long, narrow peak from another sea, laid over the wind sea.</p>
+    </div></div>
+  </section>
+  <section class="folder" id="fShape">
+    <button class="fh" type="button" aria-expanded="true">Shape<svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></button>
+    <div class="fb"><div>
+      <div id="slChop"></div>
+      <p class="hint">Chop sharpens crests by pulling the surface toward them.</p>
+    </div></div>
+  </section>
+  </div>
+  <div class="run" id="fRun">
+    <div id="slTime"></div>
+    <div class="row">
+      <button class="btn" type="button" id="bPause" aria-label="pause"><i></i><span>Pause</span></button>
+      <button class="btn ico" type="button" id="bReseed" title="New sea" aria-label="New sea"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v4.5h-4.5"/></svg></button>
+      <button class="btn ico" type="button" id="bReset" title="Reset all" aria-label="Reset all"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v4.5h4.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg></button>
+      <button class="btn ico" type="button" id="bShare" title="Copy settings link" aria-label="Copy settings link"><svg viewBox="0 0 24 24"><g class="ic"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/></g><path class="ok" d="M5 12.5 10 17 19 7"/><path class="no" d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+  </div>
+</aside>
+
+<div class="dlg" id="lightDlg" role="dialog" aria-label="Light, fine tune">
+  <div class="dh"><span>Light · fine tune</span><button class="btn ico" type="button" id="bLightClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <nav class="dots" id="segSun" aria-label="Sun"><button type="button" data-m="tod" aria-pressed="true">Time of day</button><button type="button" data-m="manual">Manual</button></nav>
+  <div id="slSunEl"></div><div id="slSunAz"></div>
+  <div class="dials"><div id="dGlint"></div><div id="dClarity"></div></div>
+  <p class="hint">Moving the sun by hand takes it off the clock; pick Time of day to put it back.</p>
+</div>
+
+<div id="nogpu"><div><h2>This needs WebGPU</h2><p>The sea is simulated with compute shaders. Open this page in Chrome or Edge, or Safari 26 on macOS and iOS.</p></div></div>
+<script type="module" src="/src/bench/main.ts"></script>
+</body>
+</html>
