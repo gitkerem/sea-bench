@@ -21,9 +21,16 @@ Add `?n=256` to the URL for finer ripples on a strong GPU, `?check=1` to compile
 
 ## Use the sea elsewhere
 
+The package exports `src/sea` as TypeScript source, for a Vite + TypeScript project. Install it from a tag, with
+three as your own dependency (it is a peer, so there is only ever one copy):
+
+```
+npm install three@0.186.0 github:gitkerem/sea-bench#v0.1.0
+```
+
 ```ts
 import * as THREE from 'three/webgpu';
-import { SeaSim, SeaColumn, travelFromCompass } from './src/sea';
+import { SeaSim, SeaColumn, travelFromCompass } from 'sea-bench';
 
 const renderer = new THREE.WebGPURenderer({ canvas });
 await renderer.init();
@@ -56,3 +63,7 @@ The FFT-on-TSL approach follows [iodiot/webgpu-ocean](https://github.com/iodiot/
 one-spectrum-for-CPU-and-GPU design follows [True Wind](https://github.com/hclivess/truewind) and
 [Fair Winds](https://github.com/flowwweb/sailingsimulator). Spectrum after Hasselmann et al. (JONSWAP, 1973);
 surface after Tessendorf (2001).
+
+## Licence
+
+MIT. See `LICENSE`.
