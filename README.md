@@ -29,7 +29,7 @@ The package exports `src/sea` as TypeScript source, for a Vite + TypeScript proj
 three as your own dependency (it is a peer, so there is only ever one copy):
 
 ```
-npm install three@0.186.0 github:gitkerem/sea-bench#v0.1.0
+npm install three@0.186.0 github:gitkerem/sea-bench#v0.3.0
 ```
 
 ```ts
@@ -58,6 +58,14 @@ lighten it.
 ```ts
 column.look.gustMap.value = myGustTexture;
 column.look.gust.value = 1;          // 0 = off, the default
+```
+
+A moving seabed: slide the sand, its ripples, the wall's cut section and the rocks under the column by the ground
+your scene covers. Rocks pass out through the wall and come round again; the caustics ride with the water.
+
+```ts
+sea.U.off.value.set(waterX, waterZ); // what you've covered through the water
+column.setBedOffset(groundX, groundZ); // and over the ground (they differ when a current runs)
 ```
 
 ## Layout

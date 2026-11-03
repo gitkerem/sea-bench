@@ -7,7 +7,7 @@ import * as THREE from 'three/webgpu';
 import {
   Fn, If, uniform, float, vec2, vec3, vec4, texture, varying, positionGeometry, positionLocal, positionWorld, cameraPosition,
   modelWorldMatrix, Discard, mx_noise_float, mx_worley_noise_float, fwidth, cos, sin, exp, abs, max, min, mix, smoothstep,
-  clamp, dot, normalize, cross, pow, fract, length, select, reflect,
+  clamp, dot, normalize, cross, pow, fract, length, select, reflect, frontFacing,
 } from 'three/tsl';
 import type { SeaSim } from './sea-sim';
 
@@ -43,6 +43,11 @@ export interface Look {
   gustMap: N;
   /** how much of the gust map shows: 0 off (the default), 1 full */
   gust: U;
+  /** How far the seabed has slid under the column, metres (block-local xz): the sand, its ripples and the cut
+   *  section in the wall read the bed here. 0 keeps the bed still (the default). Scroll it by the ground a boat
+   *  covers, the way the sea's `off` is the water it covers; with a current running the two part company.
+   *  SeaColumn.setBedOffset sets it and slides the rocks along with it. */
+  bedOff: U<THREE.Vector2>;
 }
 
 export function makeLook(): Look {
@@ -50,7 +55,7 @@ export function makeLook(): Look {
     sceneCol: uniform(new THREE.Color('#ECE9E1')), zenith: uniform(new THREE.Color('#7E97AD')),
     sunDir: uniform(new THREE.Vector3(-0.78, 0.60, -0.17).normalize()), sunCol: uniform(new THREE.Color(1.0, 0.94, 0.82)),
     glint: uniform(1), clarity: uniform(1), murk: uniform(0.3), hs: uniform(0.4), dark: uniform(0), radius: uniform(7), waterY: uniform(0),
-    gustMap: texture(NO_GUST), gust: uniform(0),
+    gustMap: texture(NO_GUST), gust: uniform(0), bedOff: uniform(new THREE.Vector2()),
   };
 }
 
@@ -134,8 +139,10 @@ export function makeUnderwater(sea: SeaSim, look: Look) {
   return Fn(([albedo, n, p]: N[]) => {
     const xz = p.xz, level = sampleSea(xz).y.add(look.waterY), depth = max(level.sub(p.y), 0.05);
     const Lw = normalize(mix(look.sunDir, vec3(0, 1, 0), 0.45)), NdotL = max(dot(n, Lw), 0);
-    const c1 = mx_worley_noise_float(vec3(xz.mul(0.55), sea.U.tSim.mul(0.25)));
-    const c2 = mx_worley_noise_float(vec3(xz.mul(0.85).add(3.7), sea.U.tSim.mul(0.19).add(5.0)));
+    // the caustics are the waves overhead focusing the sun, so they ride with the water (its `off`), not the sand
+    const cw = xz.add(sea.U.off);
+    const c1 = mx_worley_noise_float(vec3(cw.mul(0.55), sea.U.tSim.mul(0.25)));
+    const c2 = mx_worley_noise_float(vec3(cw.mul(0.85).add(3.7), sea.U.tSim.mul(0.19).add(5.0)));
     const caust = c1.mul(c2).mul(2.2).mul(NdotL).mul(mix(1.4, 0.6, smoothstep(0.7, 1.7, depth)));
     const lit = albedo.mul(n.y.mul(0.25).add(0.35).add(NdotL.mul(0.75)).add(caust));
     const trans = exp(vec3(0.38, 0.15, 0.09).mul(depth.div(look.clarity).mul(-1.6)));
@@ -158,7 +165,7 @@ export function makeWallMaterial(sea: SeaSim, look: Look, seabed: N): THREE.Mesh
     col = col.add(vec3(0.20, 0.42, 0.40).mul(exp(depth.mul(-7)).mul(0.35)));
     const nrm = normalize(vec3(p.x, 0, p.z)), lit = max(dot(nrm, look.sunDir), 0).mul(0.25).add(0.80);
     const alpha = mix(float(0.40), float(0.74), smoothstep(0.0, 1.6, depth)).add(look.murk.mul(0.12));
-    const fh = seabed(xz), strata = sin(p.y.mul(26).add(mx_noise_float(vec3(xz.mul(1.3), 4.0)).mul(3))).mul(0.5).add(0.5);
+    const bed: N = xz.add(look.bedOff), fh = seabed(bed), strata = sin(p.y.mul(26).add(mx_noise_float(vec3(bed.mul(1.3), 4.0)).mul(3))).mul(0.5).add(0.5);
     const section = mix(vec3(0.27, 0.21, 0.13), vec3(0.40, 0.32, 0.20), strata).mul(lit), underBed = p.y.lessThan(fh);
     return vec4(select(underBed, section, col.mul(lit)), select(underBed, float(1), clamp(alpha, 0, 0.9)));
   })();
@@ -168,11 +175,11 @@ export function makeWallMaterial(sea: SeaSim, look: Look, seabed: N): THREE.Mesh
 /** The sand floor: the seabed heightfield with analytic normals, shaded underwater. */
 export function makeSeabedMaterial(look: Look, seabed: N, underwater: N): THREE.MeshBasicNodeMaterial {
   const mat = new THREE.MeshBasicNodeMaterial();
-  mat.positionNode = vec3(positionGeometry.x, seabed(positionGeometry.xz), positionGeometry.z);
+  mat.positionNode = vec3(positionGeometry.x, seabed(positionGeometry.xz.add(look.bedOff)), positionGeometry.z);
   mat.colorNode = Fn(() => {
-    const p = positionWorld, xz = p.xz;
-    If(length(xz).greaterThan(look.radius.sub(0.004)), () => { Discard(); });
-    const e = 0.05;
+    const p = positionWorld;
+    If(length(p.xz).greaterThan(look.radius.sub(0.004)), () => { Discard(); });
+    const xz: N = p.xz.add(look.bedOff), e = 0.05;
     const hx = seabed(xz.add(vec2(e, 0))).sub(seabed(xz.sub(vec2(e, 0)))).div(2 * e), hz = seabed(xz.add(vec2(0, e))).sub(seabed(xz.sub(vec2(0, e)))).div(2 * e);
     const n = normalize(vec3(hx.negate(), 1, hz.negate()));
     const grain = mx_noise_float(vec3(xz.mul(3.0), 9.0)).mul(0.5).add(0.5);
@@ -183,18 +190,28 @@ export function makeSeabedMaterial(look: Look, seabed: N, underwater: N): THREE.
   return mat;
 }
 
-/** Boulders: a noise-displaced sphere with normals rebuilt from the displacement, shaded underwater. */
-export function makeRockMaterial(underwater: N): THREE.MeshBasicNodeMaterial {
+/** Boulders: a noise-displaced sphere with normals rebuilt from the displacement, shaded underwater. Given the
+ *  look, a rock that crosses the column's wall is cut there, the cut face solid rock, so rocks can slide in and out
+ *  with a moving bed. */
+export function makeRockMaterial(underwater: N, look?: Look): THREE.MeshBasicNodeMaterial {
   const shape = (q: N) => q.mul(mx_noise_float(q.mul(1.7)).mul(0.32).add(1)), mat = new THREE.MeshBasicNodeMaterial();
+  if (look) mat.side = THREE.DoubleSide;
   mat.positionNode = shape(positionLocal);
   mat.colorNode = Fn(() => {
+    if (look) If(length(positionWorld.xz).greaterThan(look.radius.sub(0.004)), () => { Discard(); });
     const q = positionGeometry, nl = normalize(q);
     const t1 = normalize(cross(nl, select(abs(nl.y).lessThan(0.9), vec3(0, 1, 0), vec3(1, 0, 0)))), t2 = cross(nl, t1), e = 0.03;
     const d1 = shape(q.add(t1.mul(e))).sub(shape(q.sub(t1.mul(e)))), d2 = shape(q.add(t2.mul(e))).sub(shape(q.sub(t2.mul(e))));
-    const n = normalize(cross(d1, d2).transformDirection(modelWorldMatrix));
+    let n = normalize(cross(d1, d2).transformDirection(modelWorldMatrix));
     const mottle = mx_noise_float(q.mul(4.0).add(2.0)).mul(0.5).add(0.5);
     let albedo = mix(vec3(0.17, 0.18, 0.16), vec3(0.31, 0.30, 0.26), mottle);
     albedo = mix(albedo, vec3(0.13, 0.23, 0.13), smoothstep(0.3, 0.9, n.y).mul(0.5));
+    if (look) {
+      // seen through the cut, the inside faces are the rock's section: plain stone, lit as if facing out of the wall
+      const out = normalize(vec3(positionWorld.x, 0, positionWorld.z));
+      n = select(frontFacing, n, out);
+      albedo = select(frontFacing, albedo, vec3(0.22, 0.22, 0.20));
+    }
     return vec4(underwater(albedo, n, positionWorld), 1);
   })();
   return mat;

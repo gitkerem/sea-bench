@@ -29,6 +29,9 @@ export class SeaColumn extends THREE.Group {
   readonly ground: THREE.Mesh;
   readonly rocks: THREE.Mesh[] = [];
   readonly radius: number;
+  /** where each rock sits with the bed still, and the square the rocks repeat over as the bed slides */
+  private readonly rockHome: [number, number][] = [];
+  private readonly rockTile: number;
 
   constructor(sea: SeaSim, opts: ColumnOptions = {}) {
     super();
@@ -56,10 +59,11 @@ export class SeaColumn extends THREE.Group {
     this.floor.frustumCulled = false;
     this.add(this.floor);
 
-    const rockGeo = new THREE.IcosahedronGeometry(1, 3), rockMat = makeRockMaterial(underwater);
+    const rockGeo = new THREE.IcosahedronGeometry(1, 3), rockMat = makeRockMaterial(underwater, this.look);
+    this.rockTile = radius * 2 + 4;   // wider than the column, so a rock is gone past the wall before it comes round again
     for (const [x, z, r, ry] of opts.rocks ?? DEFAULT_ROCKS) {
       const m = new THREE.Mesh(rockGeo, rockMat);
-      m.position.set(x, 0.22, z); m.scale.set(r, r * 0.72, r * 0.9); m.rotation.set(0.3, ry, 0.15);
+      m.position.set(x, 0.22, z); this.rockHome.push([x, z]); m.scale.set(r, r * 0.72, r * 0.9); m.rotation.set(0.3, ry, 0.15);
       this.rocks.push(m); this.add(m);
     }
 
@@ -67,6 +71,14 @@ export class SeaColumn extends THREE.Group {
     groundGeo.rotateX(-Math.PI / 2); groundGeo.translate(0, -0.01, 0);
     this.ground = new THREE.Mesh(groundGeo, makeGroundMaterial(this.look));
     this.add(this.ground);
+  }
+
+  /** Slide the seabed under the column by (x, z) metres: the sand, its ripples, the wall's section and the rocks,
+   *  which pass out through the wall and come round again a tile later. 0, 0 is the bed at rest. */
+  setBedOffset(x: number, z: number): void {
+    this.look.bedOff.value.set(x, z);
+    const T = this.rockTile, wrap = (v: number) => v - T * Math.floor(v / T + 0.5);
+    this.rocks.forEach((m, i) => { const [hx, hz] = this.rockHome[i]; m.position.x = wrap(hx - x); m.position.z = wrap(hz - z); });
   }
 }
 
