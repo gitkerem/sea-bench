@@ -5,6 +5,7 @@ import { BenchUI, $ } from './ui';
 import { loadState, DEFAULTS, shareUrl, seaWord, compass, sunFromTod, type BenchState } from './state';
 import { BenchCamera } from './camera';
 import { startAnalytics } from './analytics';
+import { typeTitle } from './title';
 
 const D2R = Math.PI / 180, KN = 0.5144;
 const q = new URLSearchParams(location.search);
@@ -136,5 +137,6 @@ async function main() {
 
 // before main(), so a visitor without WebGPU still counts
 startAnalytics();
+typeTitle($('title'));
 main();
 export type { BenchState };
