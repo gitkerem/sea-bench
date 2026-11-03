@@ -2,6 +2,10 @@
 
 A real sea in a cut-away column, and the bench that tunes it.
 
+### ▶ Try it live: [kerem.co/projects/sea-bench](https://www.kerem.co/projects/sea-bench)
+
+[![Sea bench running at kerem.co/projects/sea-bench: a cut-away column of moderate sea, with the controls on the right](docs/img/bench.jpg)](https://www.kerem.co/projects/sea-bench)
+
 The water is a JONSWAP wave spectrum turned into three FFT height fields on the GPU every frame — three.js r186
 WebGPU with TSL compute — and shaded in TSL. The same seeded spectrum is summed on the CPU, strongest waves
 first, so anything that floats on it (a dinghy, in the project this feeds) feels the water it sees. The bench
