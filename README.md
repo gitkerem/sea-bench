@@ -47,6 +47,15 @@ renderer.render(scene, camera);
 `SeaColumn` is the diorama; `makeSurfaceMaterial` and friends in `shading.ts` work on your own geometry.
 `sea.U.off` scrolls the sea under a moving scene; `sea.U.lambda` is the chop.
 
+Wind on the water: give the look a map of how hard the wind blows over the column (a red-channel texture laid
+across the column's width, 0 light air … 1 gust) and turn it up. Gusts darken and roughen the water, lulls and lees
+lighten it.
+
+```ts
+column.look.gustMap.value = myGustTexture;
+column.look.gust.value = 1;          // 0 = off, the default
+```
+
 ## Layout
 
 ```
