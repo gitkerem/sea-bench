@@ -4,6 +4,7 @@ import { SeaSim, SeaColumn, seaStats, swellAmpForHs, travelFromCompass, G, type 
 import { BenchUI, $ } from './ui';
 import { loadState, DEFAULTS, shareUrl, seaWord, compass, sunFromTod, type BenchState } from './state';
 import { BenchCamera } from './camera';
+import { startAnalytics } from './analytics';
 
 const D2R = Math.PI / 180, KN = 0.5144;
 const q = new URLSearchParams(location.search);
@@ -133,5 +134,7 @@ async function main() {
   (window as unknown as { __bench: unknown }).__bench = { renderer, sea, column, state: S, G };
 }
 
+// before main(), so a visitor without WebGPU still counts
+startAnalytics();
 main();
 export type { BenchState };
