@@ -88,7 +88,8 @@ kbd{font:400 10px/1 var(--mono);padding:2px 5px;border-radius:4px;border:1px sol
 /* the wind row: a compass ring the size of a speed disc, the figures logged beside it, its strength on an upright
    bar; the ring's middle shows the wind, its sub line the bearing it comes from */
 .windrow{display:grid;grid-template-columns:148px 1fr 24px;gap:14px;align-items:center;padding:6px 0 10px}
-.wdata{margin:0 -2px 0 0;min-width:0;justify-self:end;display:flex;flex-direction:column;align-items:flex-start;gap:11px;text-align:left}
+/* the figures read right-aligned against the bar, with air between them and it */
+.wdata{margin:0 10px 0 0;min-width:0;justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:11px;text-align:right}
 .wdata dt{font:400 9.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .wdata dd{margin:4px 0 0;font:400 11px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
 .vbar{position:relative;width:24px;height:148px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--ink);cursor:ns-resize;touch-action:none;outline:none}
