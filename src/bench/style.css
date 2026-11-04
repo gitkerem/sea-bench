@@ -92,7 +92,7 @@ body.logopen .page::after{opacity:.16}
   transition:opacity 520ms var(--ease),visibility 0s 520ms}
 body.logopen .logscrim{opacity:1;visibility:visible;transition:opacity 520ms var(--ease)}
 
-.log{position:fixed;z-index:50;top:12px;bottom:12px;left:12px;width:min(460px,calc(100vw - 24px));display:flex;flex-direction:column;
+.log{position:fixed;z-index:50;top:12px;bottom:12px;left:12px;width:min(540px,calc(100vw - 24px));display:flex;flex-direction:column;
   background:var(--plate);color:var(--ink);border:1px solid var(--line);border-radius:var(--r-plate);outline:0;font:400 12px/1.45 var(--hud);
   transform:translateX(calc(-100% - 24px));visibility:hidden;transition:transform 520ms var(--ease),visibility 0s linear 520ms}
 body.logopen .log{transform:none;visibility:visible;transition:transform 520ms var(--ease)}
