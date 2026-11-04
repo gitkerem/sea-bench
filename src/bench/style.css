@@ -67,13 +67,14 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 #nogpu p{max-width:36ch;font-size:15px;line-height:1.5;color:var(--ink-2)}
 #nogpu h2{font-weight:300;font-size:26px;margin:0 0 8px}
 /* ===== change log: the button by the version, a side drawer, the bench easing back behind it (log.ts) ===== */
-.tline{display:flex;align-items:center;gap:12px;width:max-content;margin:0 0 14px;pointer-events:auto}
+.tline{display:flex;align-items:center;gap:10px;width:max-content;margin:0 0 14px;pointer-events:auto}
+/* a small ghost button, the change log's Changelog and Close: a hairline pill, no fill until you point at it */
+.txtbtn,.logbtn{flex:none;display:inline-flex;align-items:center;height:20px;padding:0 8px;border:1px solid var(--line);border-radius:var(--r-pill);
+  background:none;color:var(--ink-2);cursor:pointer;font:400 9.5px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;
+  transition:color 160ms,background 160ms,border-color 160ms}
+.txtbtn:hover,.logbtn:hover,.logbtn[aria-expanded="true"]{color:var(--ink);border-color:var(--line-2);background:var(--well)}
 /* waits out of sight beside the version; hovering the title slides it in from the left */
-/* a small text button: the change log's Changelog and Close */
-.txtbtn,.logbtn{flex:none;padding:6px 0;border:0;background:none;color:var(--ink-2);cursor:pointer;
-  font:400 9.5px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;transition:color 160ms}
-.txtbtn:hover,.logbtn:hover,.logbtn[aria-expanded="true"]{color:var(--ink)}
-.logbtn{margin:-6px 0;opacity:0;transform:translateX(-10px);transition:opacity 220ms var(--ease),transform 280ms var(--ease),color 160ms}
+.logbtn{margin:-3px 0;opacity:0;transform:translateX(-10px);transition:opacity 220ms var(--ease),transform 280ms var(--ease),color 160ms,background 160ms,border-color 160ms}
 .tline:hover .logbtn,.logbtn:focus-visible,.logbtn[aria-expanded="true"]{opacity:1;transform:none}
 @media (hover:none){.logbtn{opacity:1;transform:none}}
 
@@ -82,39 +83,40 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 body{transition:background 480ms var(--ease)}
 body.logopen{background:color-mix(in srgb,var(--ink) 12%,var(--scene))}
 .page{position:fixed;inset:0;transform-origin:100% 50%;transition:transform 520ms var(--ease),border-radius 520ms var(--ease)}
-.page::after{content:"";position:absolute;inset:0;z-index:30;background:var(--scene);opacity:0;pointer-events:none;transition:opacity 520ms var(--ease)}
+.page::after{content:"";position:absolute;inset:0;z-index:30;background:#000;opacity:0;pointer-events:none;transition:opacity 520ms var(--ease)}
 body.logopen .page{transform:translateX(-16px) scale(.92);border-radius:var(--r-plate);overflow:hidden;box-shadow:0 0 0 1px var(--line)}
-body.logopen .page::after{opacity:.35}
-/* the bench goes slightly soft behind the drawer: one backdrop blur on the scrim, faded in with it, and skipped
+body.logopen .page::after{opacity:.16}
+/* the bench goes soft behind the drawer, and a shade darker: one backdrop blur on the scrim, faded in with it, and skipped
    entirely (visibility hidden) while the drawer is shut */
-.logscrim{position:fixed;inset:0;z-index:40;opacity:0;visibility:hidden;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+.logscrim{position:fixed;inset:0;z-index:40;opacity:0;visibility:hidden;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
   transition:opacity 520ms var(--ease),visibility 0s 520ms}
 body.logopen .logscrim{opacity:1;visibility:visible;transition:opacity 520ms var(--ease)}
 
-.log{position:fixed;z-index:50;top:12px;bottom:12px;left:12px;width:min(400px,calc(100vw - 24px));display:flex;flex-direction:column;
+.log{position:fixed;z-index:50;top:12px;bottom:12px;left:12px;width:min(460px,calc(100vw - 24px));display:flex;flex-direction:column;
   background:var(--plate);color:var(--ink);border:1px solid var(--line);border-radius:var(--r-plate);outline:0;font:400 12px/1.45 var(--hud);
   transform:translateX(calc(-100% - 24px));visibility:hidden;transition:transform 520ms var(--ease),visibility 0s linear 520ms}
 body.logopen .log{transform:none;visibility:visible;transition:transform 520ms var(--ease)}
-.log-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 18px 14px 20px;border-bottom:1px solid var(--line)}
-.log-h h2{margin:2px 0 0;font:400 13px/1 var(--hud);letter-spacing:.24em;text-transform:uppercase}
-.log-h .sum{margin:8px 0 0;font:400 10.5px/1 var(--hud);letter-spacing:.04em;color:var(--ink-2)}
-.log-h .txtbtn{margin:-4px 0 0}
+/* inside the drawer everything sits on one scale, 4 · 8 · 12 · 16 · 24, and one 24 px gutter */
+.log-h{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:24px 24px 16px;border-bottom:1px solid var(--line)}
+.log-h h2{margin:0;font:400 13px/16px var(--hud);letter-spacing:.24em;text-transform:uppercase}
+.log-h .sum{margin:8px 0 0;font:400 10.5px/12px var(--hud);letter-spacing:.04em;color:var(--ink-2)}
 .log-s{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 
 /* filters */
-.log-f{display:flex;flex-direction:column;gap:6px;padding:10px 20px 6px}
-.frow{display:flex;flex-direction:column;gap:2px}
-.frow>.lab{color:var(--ink-2);font-size:9.5px;padding-top:6px}
-.log-f .dots{flex-wrap:wrap;height:auto;column-gap:0}
-.log-f .dots button{flex:none;gap:6px;height:30px;padding:0 6px 0 0}
+.log-f{display:flex;flex-direction:column;gap:16px;padding:16px 24px 24px;border-bottom:1px solid var(--line)}
+.frow{display:flex;flex-direction:column;gap:8px}
+.frow>.lab,.log-f .switch .lab{color:var(--ink-2);font-size:9.5px}
+.log-f .dots{flex-wrap:wrap;height:auto;column-gap:0;margin:-4px 0}
+.log-f .dots button{flex:none;gap:6px;height:28px;padding:0 8px 0 0}
+.log-f .switch{height:auto}
 /* a version reads v0.5.2, lower-case v, even where the type around it is set in capitals */
 .vtx,.hdr .title .v,.meta .ver{text-transform:none}
 /* Space Mono gives a dot a full cell, which opens v0.05.2 into v 0 . 05 . 2; pull the dots in, and keep the
    title's wide tracking off the number */
 .pt{font-style:normal;margin:0 -.2em}
 .hdr .title .v{letter-spacing:.04em}
-.chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0 4px}
-.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid var(--line-2);border-radius:var(--r-pill);background:none;color:var(--ink);cursor:pointer;
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border:1px solid var(--line-2);border-radius:var(--r-pill);background:none;color:var(--ink);cursor:pointer;
   font:400 10px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;transition:background 160ms,color 160ms,border-color 160ms}
 .chip em{font-style:normal;color:var(--ink-2);letter-spacing:0}
 .chip:hover{background:var(--well)}
@@ -131,54 +133,24 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .node.k-improved{background:radial-gradient(circle,var(--ink) 0 32%,var(--plate) 36%)}
 .node.k-system{border-radius:2px}
 
-/* the strip: a tick per change, taller for bigger ones, the versions bracketed under it */
-.strip{position:relative;height:72px;margin:10px 26px 4px}
-.strip::before{content:"";position:absolute;left:-6px;right:-6px;top:30px;height:1px;background:var(--ink)}
-.strip .tk{position:absolute;bottom:34px;width:13px;margin-left:-6.5px;padding:0;border:0;background:none;cursor:pointer;display:flex;justify-content:center;transition:opacity 200ms}
-.strip .tk::before{content:"";width:1px;background:var(--ink)}
-.strip .tk.s1{height:8px}.strip .tk.s2{height:16px}.strip .tk.s3{height:26px}
-.strip .tk.off{opacity:.2}
-.strip .tk:hover::before,.strip .tk:focus-visible::before{background:var(--red);width:2px}
-.strip .vb{position:absolute;top:40px;height:5px;border:1px solid var(--line-2);border-top:0;min-width:1px}
-.strip .vb>span{position:absolute;top:8px;left:0;font:400 9px/1 var(--hud);letter-spacing:.08em;color:var(--ink-2);white-space:nowrap}
-.strip .vb.cur{border-color:var(--red)}.strip .vb.cur>span{color:var(--red)}
-.strip .vb.lo>span{top:19px}
-.strip .cut{position:absolute;top:0;height:46px;border-left:1px dashed var(--red)}
-
-/* the list: versions newest first, the head of the one you are in pinned to the top */
-.log-l{padding:0 0 20px}
-.vh{position:sticky;top:0;z-index:2;display:flex;align-items:baseline;gap:10px;padding:14px 20px 10px;background:var(--plate);border-top:1px solid var(--ink);border-bottom:1px solid var(--line)}
-.ver.cur .vh{border-top-color:var(--red)}
-.vn{font:400 16px/1 var(--hud);letter-spacing:.04em}
-.ver.cur .vn{color:var(--red)}
-.vname{flex:1;min-width:0;font:400 10px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vr{font:400 9.5px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
-.ver.cur .vr{color:var(--red)}
-.vmeta{display:grid;grid-template-columns:64px 1fr;row-gap:3px;margin:12px 20px 0;font:400 10px/1.5 var(--hud);letter-spacing:.03em;text-transform:uppercase;font-variant-numeric:tabular-nums}
-.vmeta dt{color:var(--ink-2)}.vmeta dd{margin:0}
-.vmeta a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line)}.vmeta a:hover{border-color:var(--ink)}
-.ver figure{margin:12px 20px 4px}
-.ver img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line);border-radius:8px}
-.ver figcaption{margin-top:6px;font:400 10px/1.45 var(--hud);color:var(--ink-2)}
-.rows{position:relative;list-style:none;margin:10px 0 0;padding:0 20px 0 42px}
-.rows::before{content:"";position:absolute;left:24px;top:0;bottom:0;width:1px;background:var(--line-2)}
-.e{position:relative;padding:12px 0 13px;border-bottom:1px solid var(--line);transition:background 600ms}
-.e:last-child{border-bottom:0}
-.e>.node{position:absolute;left:-22.5px;top:15px}
-.e.s1>.node{width:7px;height:7px;left:-21.5px;top:16px}
-.e.s3>.node{width:12px;height:12px;left:-24px;top:13.5px}
-.e .eh{display:flex;justify-content:space-between;gap:10px;font:400 9.5px/1.4 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
-.e b{display:block;margin-top:5px;font:400 13px/1.35 var(--hud);letter-spacing:-.01em}
-.e.s3 b{font-size:14px}
-.e p{margin:4px 0 0;font:400 11px/1.55 var(--hud);color:var(--ink-2)}
-.e .ef{display:flex;gap:10px;align-items:center;margin-top:7px;font:400 9.5px/1 var(--hud);letter-spacing:.04em;color:var(--ink-2)}
-.e .ef a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line)}
-.e .ef a:hover{color:var(--ink);border-color:var(--ink)}
-.e.flash{background:color-mix(in srgb,var(--red) 10%,transparent);transition:none}
-.vstart{display:flex;justify-content:space-between;margin:2px 20px 22px;padding-top:10px;border-top:1px dashed var(--line-2);font:400 9.5px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
-.ver.cur .vstart{border-top-color:var(--red)}.ver.cur .vstart span:first-child{color:var(--red)}
-.empty{padding:28px 20px;display:flex;flex-direction:column;gap:12px;align-items:flex-start;color:var(--ink-2)}
-.empty p{margin:0}.empty .btn{padding:0 16px}
+/* the list: releases newest first, the head of the one you are in pinned to the top, the changes on one rail */
+.log-l{padding:0 0 24px}
+.vh{position:sticky;top:0;z-index:2;display:flex;align-items:baseline;gap:12px;padding:16px 24px 12px;background:var(--plate);border-bottom:1px solid var(--line)}
+.ver+.ver .vh{border-top:1px solid var(--line)}
+.vn{font:400 14px/16px var(--hud);letter-spacing:.02em}
+.ver.cur .vn,.ver.cur .vr{color:var(--red)}
+.vname{flex:1;min-width:0;font:400 10px/16px var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vr{font:400 9.5px/16px var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.ver img{display:block;width:calc(100% - 48px);height:auto;aspect-ratio:16/9;object-fit:cover;margin:16px 24px 0;border:1px solid var(--line);border-radius:8px}
+/* the rail runs through the nodes, 28 px in; each change is its title and one line */
+.rows{position:relative;list-style:none;margin:0;padding:8px 24px 8px 48px}
+.rows::before{content:"";position:absolute;left:28px;top:24px;bottom:24px;width:1px;background:var(--line)}
+.e{position:relative;padding:8px 0}
+.e>.node{position:absolute;left:-24.5px;top:12px}
+.e b{display:block;font:400 13px/18px var(--hud);letter-spacing:-.01em}
+.e p{margin:4px 0 0;font:400 11.5px/18px var(--hud);color:var(--ink-2)}
+.empty{padding:24px;display:flex;flex-direction:column;gap:12px;align-items:flex-start;color:var(--ink-2)}
+.empty p{margin:0}
 @media (max-width:720px){
   .log{top:0;bottom:0;left:0;width:100vw;border-radius:0;border:0}
   body.logopen .page{transform:scale(.94);transform-origin:50% 50%}

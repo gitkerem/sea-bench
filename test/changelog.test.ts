@@ -27,7 +27,7 @@ describe('change log', () => {
   it('writes short titles and one-line notes', () => {
     for (const e of ENTRIES) {
       expect(e.title.length).toBeLessThanOrEqual(48);
-      expect(e.text.length).toBeLessThanOrEqual(200);
+      expect(e.text.length).toBeLessThanOrEqual(110);
     }
   });
 

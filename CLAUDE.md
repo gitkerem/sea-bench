@@ -86,10 +86,10 @@ prototype letters, 001.A and 001.B; Kerem dropped them as confusing.)
 
 Every change gets an entry in `src/bench/changelog.ts`, in the same commit: oldest first, local time as written, the
 release it ships in (`v0.5.2`), its kind (new · improved · fixed · system) and size (1 a detail, 2 a feature, 3 a step), a title
-of what people get (≤ 48 characters) and one line (≤ 200). Fill in `commit` for earlier entries once their hash
+of what people get (≤ 48 characters) and one short line (≤ 110). Fill in `commit` for earlier entries once their hash
 exists; the newest can leave it out ("this release"). A new release adds a `VERSIONS` row; one that changes how the bench
-looks gets a frame of it (`src/bench/img/<tag>.jpg`, 880 px wide). The drawer's filter and strip group releases by
-minor series (v0.5). `test/changelog.test.ts` keeps it in order. The drawer is `src/bench/log.ts`, a side drawer:
+looks gets a frame of it (`src/bench/img/<tag>.jpg`, 880 px wide). The drawer's version filter groups releases by
+minor series (v0.5). `test/changelog.test.ts` keeps it in order. The drawer is `src/bench/log.ts`, a side drawer with filters and one rail of changes, no strip:
 hover the version in the title for its button; opening it eases the page back with one CSS scale on `#page`.
 
 ## Known gaps / next
