@@ -14,7 +14,7 @@ body{margin:0;background:var(--scene);color:var(--ink);font:400 13px/1.45 var(--
 canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 /* header: one title, then three aligned columns of label → value rows */
 .hdr{position:fixed;z-index:4;top:calc(22px + env(safe-area-inset-top,0px));left:max(22px,env(safe-area-inset-left,0px));right:calc(340px + max(22px,env(safe-area-inset-right,0px)));pointer-events:none}
-.hdr .title{margin:0 0 14px;font:400 14px/1 var(--hud);letter-spacing:.24em;text-transform:uppercase;white-space:pre}
+.hdr .title{margin:0;font:400 14px/1 var(--hud);letter-spacing:.24em;text-transform:uppercase;white-space:pre}
 /* the type-on: unsettled cells are dim glyphs, the head is a thin block that blinks twice and goes */
 .title .v{color:var(--red)}
 .title .g{color:var(--ink-2)}
@@ -66,10 +66,125 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 #nogpu.show{display:grid}
 #nogpu p{max-width:36ch;font-size:15px;line-height:1.5;color:var(--ink-2)}
 #nogpu h2{font-weight:300;font-size:26px;margin:0 0 8px}
-@media (max-width:1180px){.meta dl:nth-child(3){display:none}}
-@media (max-width:980px){.meta dl:nth-child(2){display:none}}
+/* ===== change log: the button by the version, the drawer that comes down from the top (log.ts) ===== */
+.tline{display:flex;align-items:center;gap:12px;width:max-content;margin:0 0 14px;pointer-events:auto}
+/* waits out of sight beside the version; hovering the title slides it in from the left */
+.logbtn{flex:none;display:grid;place-items:center;width:26px;height:26px;margin:-6px 0;padding:0;border:1px solid var(--line-2);border-radius:50%;background:none;color:var(--ink);cursor:pointer;
+  opacity:0;transform:translateX(-10px);transition:opacity 220ms var(--ease),transform 280ms var(--ease),background 160ms}
+.logbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round}
+.logbtn svg circle{fill:currentColor;stroke:none}
+.logbtn:hover{background:var(--well)}
+.tline:hover .logbtn,.logbtn:focus-visible,.logbtn[aria-expanded="true"]{opacity:1;transform:none}
+@media (hover:none){.logbtn{opacity:1;transform:none}}
+
+.logscrim{position:fixed;inset:0;z-index:19;background:color-mix(in srgb,var(--scene) 55%,transparent);opacity:0;pointer-events:none;transition:opacity 320ms var(--ease)}
+.logscrim.on{opacity:1;pointer-events:auto}
+.log{position:fixed;z-index:20;top:0;left:0;right:0;max-height:min(82vh,780px);display:flex;flex-direction:column;
+  background:var(--plate);color:var(--ink);border-bottom:1px solid var(--line);border-radius:0 0 var(--r-plate) var(--r-plate);
+  transform:translateY(-102%);visibility:hidden;transition:transform 460ms var(--ease),visibility 0s linear 460ms;outline:0}
+.log.open{transform:none;visibility:visible;transition:transform 460ms var(--ease)}
+.log-h{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr) 36px;gap:28px;align-items:start;padding:calc(22px + env(safe-area-inset-top,0px)) 22px 18px;border-bottom:1px solid var(--line)}
+.log-t h2{margin:0;font:400 14px/1 var(--hud);letter-spacing:.24em;text-transform:uppercase}
+.log-t p{margin:10px 0 0;font:400 10px/1.5 var(--hud);letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2)}
+.log .meta{display:flex;flex-wrap:wrap;gap:12px 44px}
+.log .meta dl{grid-template-columns:72px max-content}
+.log .meta dd{white-space:normal}
+.lgs{display:flex;gap:16px;flex-wrap:wrap}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.lg em{font-style:normal;color:var(--ink-2)}
+.log .btn.ico svg path{stroke:currentColor}
+.log .scroll{overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:0 22px calc(28px + env(safe-area-inset-bottom,0px))}
+
+/* nodes: what kind of change, by its fill; how big, by its size */
+.node{display:inline-block;flex:none;border-radius:50%;box-shadow:inset 0 0 0 1px var(--ink);background:var(--plate)}
+.node.s1{width:7px;height:7px}.node.s2{width:10px;height:10px}.node.s3{width:13px;height:13px}
+.node.k-new{background:var(--ink)}
+.node.k-improved{background:radial-gradient(circle,var(--ink) 0 32%,var(--plate) 36%)}
+.node.k-system{border-radius:2px}
+.size{display:inline-flex;gap:2px;align-items:flex-end}
+.size i{width:3px;height:9px;background:var(--line)}
+.size i:nth-child(1){height:5px}.size i:nth-child(2){height:7px}
+.size[aria-label^="size 1"] i:nth-child(1),.size[aria-label^="size 2"] i:nth-child(-n+2),.size[aria-label^="size 3"] i{background:var(--ink)}
+
+/* the strip: days along the top, a tick per change rising from the axis, tags in red, the versions bracketed below */
+.strip-w{position:sticky;top:0;z-index:2;background:var(--plate);padding:20px 0 8px;border-bottom:1px solid var(--line)}
+.strip{position:relative;height:96px;margin:0 12px}
+.strip::before{content:"";position:absolute;left:-12px;right:-12px;top:62px;height:1px;background:var(--ink)}
+.strip .day{position:absolute;top:0;transform:translateX(-4px);font:400 9px/1 var(--hud);letter-spacing:.08em;color:var(--ink-2);white-space:nowrap}
+.strip .day::before{content:"";position:absolute;left:3.5px;top:12px;width:1px;height:50px;background:var(--line)}
+.strip .tk{position:absolute;bottom:34px;width:15px;margin-left:-7.5px;padding:0;border:0;background:none;cursor:pointer;display:flex;justify-content:center}
+.strip .tk::before{content:"";width:1px;background:var(--ink);transition:background 120ms}
+.strip .tk.s1{height:10px}.strip .tk.s2{height:20px}.strip .tk.s3{height:30px}
+.strip .tk::after{content:"";position:absolute;top:-3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--plate);box-shadow:inset 0 0 0 1px var(--ink)}
+.strip .tk.k-new::after{background:var(--ink)}
+.strip .tk.k-system::after{border-radius:1px}
+.strip .tk.hl::before,.strip .tk:hover::before{background:var(--red)}
+.strip .tk.hl::after,.strip .tk:hover::after{box-shadow:inset 0 0 0 1px var(--red);background:var(--red)}
+.strip .tg{position:absolute;top:66px;transform:translateX(-50%);font:400 8.5px/1 var(--hud);letter-spacing:.04em;color:var(--red);white-space:nowrap}
+.strip .tg::before{content:"";position:absolute;left:50%;top:-6px;width:1px;height:4px;background:var(--red)}
+.strip .vb{position:absolute;top:80px;height:6px;border:1px solid var(--line-2);border-top:0;min-width:1px}
+.strip .vb span{position:absolute;top:9px;left:0;font:400 9px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap}
+.strip .vb.cur{border-color:var(--red)}.strip .vb.cur span{color:var(--red)}
+.strip .cut{position:absolute;top:10px;height:80px;width:0;border-left:1px dashed var(--red)}
+.strip .cut span{position:absolute;top:0;left:6px;font:400 9px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--red);white-space:nowrap}
+.read{margin:20px 12px 0;height:12px;font:400 10px/1.2 var(--hud);letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* the ledger: each version opens with its figures and a frame of it, its changes on a rail, a rule where it began */
+.ver{padding-top:18px}
+.vh{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr) minmax(0,300px);gap:28px;align-items:start;padding-bottom:18px}
+.vid{display:flex;flex-direction:column;gap:8px}
+.vn{font:400 40px/1 var(--hud);letter-spacing:-.02em}
+.ver.cur .vn{color:var(--red)}
+.vname,.vstate{font:400 10px/1.3 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.ver.cur .vstate{color:var(--red)}
+.vh figure{margin:0}
+.vh img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line);border-radius:6px}
+.vh figcaption{margin-top:6px;font:400 9.5px/1.45 var(--hud);letter-spacing:.02em;color:var(--ink-2)}
+.vh figcaption b{font-weight:400;color:var(--ink);letter-spacing:.08em;text-transform:uppercase}
+.rows{position:relative;list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+/* the rail runs through the nodes' column */
+.rows::before{content:"";position:absolute;top:0;bottom:0;left:calc(36px + 14px + 96px + 14px + 7px);width:1px;background:var(--line-2)}
+.row{position:relative;display:grid;grid-template-columns:36px 96px 15px 78px 22px minmax(0,1fr) 128px;column-gap:14px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);transition:background 120ms}
+.row .m{display:contents}
+.row.hl{background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.row .no,.row .at,.row .kind{font:400 10px/1.5 var(--hud);letter-spacing:.06em;text-transform:uppercase;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.row .at{color:var(--ink)}
+.row .node{position:relative;z-index:1;justify-self:center;align-self:center}
+.row .kind.k-new{color:var(--ink)}
+.row .size{align-self:center}
+.row .what b{display:block;font:400 12.5px/1.35 var(--hud);letter-spacing:-.01em}
+.row .what span{display:block;margin-top:3px;font:400 11px/1.5 var(--hud);color:var(--ink-2)}
+.row .ref{justify-self:end;display:flex;gap:8px;align-items:baseline;font:400 10px/1.5 var(--hud);letter-spacing:.04em}
+.row .ref a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line)}
+.row .ref a:hover{color:var(--ink);border-color:var(--ink)}
+.row .ref .here{color:var(--ink-2)}
+.row .tag{font-style:normal;color:var(--red);border:1px solid var(--red);border-radius:var(--r-pill);padding:1px 6px;font-size:9px}
+.edge{display:flex;gap:18px;align-items:center;padding:12px 0 6px;font:400 10px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px dashed var(--line-2)}
+.edge span:first-child{color:var(--ink)}
+.ver.cur .edge{border-bottom-color:var(--red)}.ver.cur .edge span:first-child{color:var(--red)}
+/* the top edge: a solid rule where a version ends, so the two edges of a hand-over read as one boundary */
+.edge.end{padding:0 0 12px;border-bottom:0;border-top:1px solid var(--ink);padding-top:12px;margin-top:6px}
+.ver.cur .edge.end{border-top-color:var(--red)}
+@media (max-width:1100px){.vh{grid-template-columns:minmax(140px,200px) minmax(0,1fr)}.vh figure{grid-column:1/-1;max-width:420px}}
 @media (max-width:720px){
-  .hdr{right:max(22px,env(safe-area-inset-right,0px))}.meta{display:none}
+  /* the whole drawer scrolls on a phone, so its head doesn't hold the ledger to a sliver; the strip still sticks */
+  .log{max-height:88vh;overflow:auto;overscroll-behavior:contain}.log .scroll{overflow:visible}
+  .log-h{grid-template-columns:minmax(0,1fr) 36px;gap:14px;padding:calc(18px + env(safe-area-inset-top,0px)) 16px 14px}.log-h .meta{grid-column:1/-1;grid-row:2}
+  .log .scroll{padding:0 16px calc(24px + env(safe-area-inset-bottom,0px))}
+  .strip .tg,.strip .cut span,.strip .vb .nm{display:none}
+  .vh{grid-template-columns:1fr;gap:14px}.vn{font-size:32px}
+  .rows::before{left:7px}
+  .row{grid-template-columns:15px minmax(0,1fr);grid-template-areas:"node m" ". what" ". ref";row-gap:4px}
+  .row .no{display:none}
+  .row .m{display:flex;grid-area:m;gap:10px;align-items:center}
+  .row .m .node{position:absolute;left:0;top:15px;margin-left:1px}
+  .row .what{grid-area:what}.row .ref{grid-area:ref;justify-self:start}
+}
+@media (prefers-reduced-motion:reduce){.log,.log.open,.logbtn{transition:none}}
+@media (max-width:1180px){.hdr .meta dl:nth-child(3){display:none}}
+@media (max-width:980px){.hdr .meta dl:nth-child(2){display:none}}
+@media (max-width:720px){
+  .hdr{right:max(22px,env(safe-area-inset-right,0px))}.hdr .meta{display:none}
   .keys{display:none}
   .panel{top:auto;left:0;right:0;bottom:0;width:auto;max-height:46%;border-radius:var(--r-plate) var(--r-plate) 0 0;border-bottom:0}.panel .body{padding:0 max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px))}.run{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
 }

@@ -77,6 +77,15 @@ changes ship as patch tags under the same name. Bump it in
 `index.html` (title, the meta's Prototype and Date, `<title>`) and add a row to the README's Versions table. Tags stay
 semver (`vX.Y.Z`, the package version matching); a fix that nobody sees is a patch tag under the same letter.
 
+## Change log
+
+Every change gets an entry in `src/bench/changelog.ts`, in the same commit: oldest first, local time as written, the
+version it ships in, its kind (new · improved · fixed · system) and size (1 a detail, 2 a feature, 3 a step), a title
+of what people get (≤ 48 characters) and one line (≤ 200). Fill in `commit` for earlier entries once their hash
+exists; the newest can leave it out ("this release"). A new version adds a `VERSIONS` row with a frame of the bench
+(`src/bench/img/<id>.jpg`, 880 px wide). `test/changelog.test.ts` keeps it in order. The drawer is `src/bench/log.ts`:
+hover the version in the title for its button.
+
 ## Known gaps / next
 
 - Foam exists in the Jacobian math but is switched off in the materials (the author didn't like it). See HANDOFF.

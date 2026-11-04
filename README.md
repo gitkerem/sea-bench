@@ -72,12 +72,12 @@ column.setBedOffset(groundX, groundZ); // and over the ground (they differ when 
 
 The bench shows a prototype name in its title and the page name: **001** is this prototype, the water column, and
 the letter moves on when a release is called a new one (a rethink starts **002.A**). Git tags stay semver underneath, and
-the dinghy installs from those.
+the dinghy installs from those. Every change is in the bench's change log: hover the version in the title.
 
 | Name | Tags | What changed |
 |---|---|---|
 | 001.A | v0.1.0 – v0.4.0 | the water column, its bench, the chopped sea under the hull |
-| 001.B | v0.5.0 – | the instrument panel, shared with the dinghy simulator (`sea-bench/controls`); Space Mono throughout; scroll over a dial or ring to turn it |
+| 001.B | v0.5.0 – | the instrument panel, shared with the dinghy simulator (`sea-bench/controls`); Space Mono throughout; scroll over a dial or ring to turn it; the change log |
 
 ## Layout
 

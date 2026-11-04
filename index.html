@@ -12,13 +12,18 @@
 <canvas id="c" aria-label="Water column, FFT sea simulation"></canvas>
 
 <header class="hdr">
-  <h1 class="title" id="title">Sea bench <span class="v">001.B</span></h1>
+  <div class="tline">
+    <h1 class="title" id="title">Sea bench <span class="v">001.B</span></h1>
+    <button type="button" class="logbtn" id="bLog" aria-label="Change log" aria-expanded="false" aria-controls="log"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11"/><circle cx="4" cy="4" r="1.6"/><circle cx="4" cy="8" r="1.6"/><circle cx="4" cy="12" r="1.6"/><path d="M7.5 4h6M7.5 8h4M7.5 12h5"/></svg></button>
+  </div>
   <div class="meta" aria-hidden="true">
     <dl><dt>Prototype</dt><dd>001.B</dd><dt>System</dt><dd>01 · water column</dd><dt>Date</dt><dd>Nov 3, 2026</dd><dt>By</dt><dd>K &amp; Co</dd><dt>Engine</dt><dd>WebGPU · three r186</dd></dl>
     <dl><dt>State</dt><dd class="red" id="vState">moderate sea</dd><dt>Hs</dt><dd id="vHs">0.40 m</dd><dt>Tp</dt><dd id="vTp">2.5 s</dd><dt><span style="text-transform:none">λ</span>p</dt><dd id="vLp">10 m</dd><dt>Steepness</dt><dd id="vSteep">1/25</dd></dl>
     <dl><dt>Time</dt><dd id="vTime">T+00:00</dd><dt>Rate</dt><dd id="vFps">60 fps</dd><dt>Grid</dt><dd id="vGrid">128² · 3 cascades</dd><dt>Wind</dt><dd id="vWind">12 kn from E</dd><dt>Seed</dt><dd id="vSeed">1</dd></dl>
   </div>
 </header>
+<div class="logscrim" id="logScrim"></div>
+<section class="log" id="log" role="dialog" aria-modal="true" aria-labelledby="logTitle" tabindex="-1"></section>
 <div class="theme"><button type="button" id="bTheme" role="switch" aria-checked="false" aria-label="Dark mode"><span class="w">Light</span><span class="track"><span class="knob"></span></span></button></div>
 
 <div class="keys" aria-hidden="true"><div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>grid 1 m · heavy line 5 m<br>space pause · r new sea · drag to peek · scroll or pinch to zoom · double-click to reset</div>
