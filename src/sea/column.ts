@@ -6,12 +6,17 @@ import * as THREE from 'three/webgpu';
 import type { SeaSim } from './sea-sim';
 import { makeLook, makeSeabed, makeUnderwater, makeSurfaceMaterial, makeWallMaterial, makeSeabedMaterial, makeRockMaterial, makeGroundMaterial, type Look } from './shading';
 
+/** The column's depth, shared with the dinghy simulator so the bench shows the sea the boat sails on: 3.8 m of
+ *  water above the ground (2.8 m over a metre of sand, in the dinghy's reading), the wall 1.7 m above that. */
+export const WATER_Y = 3.8;
+export const WALL_TOP = 1.7;
+
 export interface ColumnOptions {
   /** radius, metres */
   radius?: number;
-  /** mean water level above the ground, metres */
+  /** mean water level above the ground, metres: 3.8, the dinghy simulator's depth, unless a scene asks otherwise */
   waterY?: number;
-  /** how far above the mean level the wall reaches (must clear the highest crest) */
+  /** how far above the mean level the wall reaches (must clear the highest crest): 1.7 */
   wallTop?: number;
   /** surface mesh segments across the disc */
   segments?: number;
@@ -29,14 +34,17 @@ export class SeaColumn extends THREE.Group {
   readonly ground: THREE.Mesh;
   readonly rocks: THREE.Mesh[] = [];
   readonly radius: number;
+  /** the mean water level above the ground, metres, so a scene can frame and float things on it */
+  readonly waterY: number;
   /** where each rock sits with the bed still, and the square the rocks repeat over as the bed slides */
   private readonly rockHome: [number, number][] = [];
   private readonly rockTile: number;
 
   constructor(sea: SeaSim, opts: ColumnOptions = {}) {
     super();
-    const radius = opts.radius ?? 7, waterY = opts.waterY ?? 1.7, wallTop = opts.wallTop ?? 1.8, seg = opts.segments ?? 260;
+    const radius = opts.radius ?? 7, waterY = opts.waterY ?? WATER_Y, wallTop = opts.wallTop ?? WALL_TOP, seg = opts.segments ?? 260;
     this.radius = radius;
+    this.waterY = waterY;
     this.look = makeLook();
     this.look.radius.value = radius; this.look.waterY.value = waterY;
 

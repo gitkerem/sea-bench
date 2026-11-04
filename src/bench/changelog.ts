@@ -48,6 +48,7 @@ export const VERSIONS: Version[] = [
   { id: 'v0.5.0', name: 'the instrument panel' },
   { id: 'v0.5.1', name: 'the version in the title' },
   { id: 'v0.5.2', name: 'one typeface, and this log', fig: figV052, caption: 'The same sea on the shared instrument panel, set in Space Mono.' },
+  { id: 'v0.5.3', name: 'the dinghy’s depth' },
 ];
 
 export const ENTRIES: Entry[] = [
@@ -114,4 +115,7 @@ export const ENTRIES: Entry[] = [
   { at: '2026-11-03T19:50', version: 'v0.5.2', kind: 'improved', size: 1,
     title: 'A simpler change log',
     text: 'One rail, a title and a line per change; the versions in a dropdown; a wider drawer over a softer bench.' },
+  { at: '2026-11-03T20:50', version: 'v0.5.3', kind: 'improved', size: 2,
+    title: 'Water as deep as the dinghy’s',
+    text: '3.8 m in the column, up from 1.7 m: the sea the boat sails on, and the default for any scene.' },
 ];

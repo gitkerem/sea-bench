@@ -29,7 +29,7 @@ The package exports `src/sea` as TypeScript source, for a Vite + TypeScript proj
 three as your own dependency (it is a peer, so there is only ever one copy):
 
 ```
-npm install three@0.186.0 github:gitkerem/sea-bench#v0.5.2
+npm install three@0.186.0 github:gitkerem/sea-bench#v0.5.3
 ```
 
 ```ts
@@ -40,7 +40,7 @@ const renderer = new THREE.WebGPURenderer({ canvas });
 await renderer.init();
 const sea = new SeaSim(renderer, { N: 128 });
 sea.setParams({ ...sea.params, windU: 8, fetch: 12000, travel: travelFromCompass(315) });
-scene.add(new SeaColumn(sea, { radius: 7, waterY: 1.7 }));
+scene.add(new SeaColumn(sea, { radius: 7 })); // 3.8 m of water, the dinghy's depth; pass waterY for another
 
 // per frame
 sea.step(dt);
@@ -82,6 +82,7 @@ one, with the minor in two digits (v0.5.2 reads v0.05.2). Every change is in the
 | v0.5.0 | the instrument panel, shared with the dinghy simulator (`sea-bench/controls`) |
 | v0.5.1 | the version in the title |
 | v0.5.2 | Space Mono throughout; scroll over a dial or ring to turn it; the change log; versions read v0.05.2; bare-line icons |
+| v0.5.3 | the column is 3.8 m deep, the dinghy simulator's depth, by default |
 
 ## Layout
 

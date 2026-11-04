@@ -28,11 +28,11 @@ async function main() {
   // ---------- the sea and its column
   const N = +(q.get('n') || 128);
   const sea = new SeaSim(renderer, { N });
-  const column = new SeaColumn(sea, { radius: 7, waterY: 1.7, segments: +(q.get('seg') || 260) });
+  const column = new SeaColumn(sea, { radius: 7, segments: +(q.get('seg') || 260) });
   const scene = new THREE.Scene();
   scene.add(column);
   const look = column.look;
-  const cam = new BenchCamera(canvas, new THREE.Vector3(0, 1.7 * 0.55, 0), 9.4, () => (window.innerWidth > 720 ? 320 + 16 + 18 : 0));
+  const cam = new BenchCamera(canvas, new THREE.Vector3(0, column.waterY * 0.55, 0), 9.4, () => (window.innerWidth > 720 ? 320 + 16 + 18 : 0));
   $('vGrid').textContent = `${N}² · ${sea.cascades.length} cascades`;
 
   // ---------- state → sea
