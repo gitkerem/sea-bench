@@ -81,7 +81,7 @@ one, with the minor in two digits (v0.5.2 reads v0.05.2). Every change is in the
 | v0.4.0 | floating things ride the chopped sea they are drawn on |
 | v0.5.0 | the instrument panel, shared with the dinghy simulator (`sea-bench/controls`) |
 | v0.5.1 | the version in the title |
-| v0.5.2 | Space Mono throughout; scroll over a dial or ring to turn it; the change log |
+| v0.5.2 | Space Mono throughout; scroll over a dial or ring to turn it; the change log; versions read v0.05.2; bare-line icons |
 
 ## Layout
 
