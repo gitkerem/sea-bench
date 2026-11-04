@@ -52,7 +52,7 @@ export function createLog(): void {
   const small = h('button', { type: 'button', class: 'switch', role: 'switch', 'aria-checked': 'true' },
     h('span', { class: 'lab' }, 'Small changes'), h('span', { class: 'track' }, h('span', { class: 'knob' })));
   const filters = h('div', { class: 'log-f' },
-    h('label', { class: 'frow line', for: 'logVer' }, h('span', { class: 'lab' }, 'Version'), vPick),
+    h('label', { class: 'frow', for: 'logVer' }, h('span', { class: 'lab' }, 'Version'), vPick),
     h('div', { class: 'frow' }, h('span', { class: 'lab' }, 'Kind'), kChips),
     small);
 
