@@ -3,8 +3,8 @@
  * the change to the sea (spectrum changes are debounced; look changes are live).
  */
 import type { BenchState } from './state';
-import { PRESETS, sunFromTod } from './state';
-import { slider, dial, ring, dots, folders } from '../controls';
+import { PRESETS, sunFromTod, compass } from './state';
+import { slider, dial, ring, vbar, dots, folders } from '../controls';
 
 export const $ = (id: string) => document.getElementById(id) as HTMLElement;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -70,6 +70,20 @@ export class BenchUI {
       $('todT').textContent = clock(S.tod);
       $('todD').textContent = S.sunManual ? 'manual' : `sun ${S.sunEl}°${sunFromTod(S.tod).below ? ' low' : ''}`;
     };
+    this.paints.push(paint); paint();
+  }
+
+  /** The wind, as the dinghy's plate shows it: the bearing it comes from on a compass ring (5°, 1° with Shift), its
+   *  strength on the upright bar beside it (0.5 kn, 2.5 kn with Shift), the knots in the ring's middle. */
+  windRow(onInput: () => void): void {
+    const S = this.state, pad3 = (d: number) => String(Math.round(d) % 360).padStart(3, '0');
+    const from = (d: number) => `${pad3(d)}° ${compass(d)}`;
+    const paintRing = ring('windFrom', { C: 74, R: 73 - 3 - 7, text: from, ...this.num('windFrom', onInput) });
+    const paintBar = vbar('windBar', { min: 2, max: 40, step: 0.5, big: 2.5, text: (v) => v.toFixed(1) + ' kn', ...this.num('windKn', onInput) });
+    const paint = () => { paintRing(); paintBar(); $('windKn').textContent = S.windKn.toFixed(1); $('windFromVal').textContent = from(S.windFrom); };
+    // the middle follows the hand as it moves, not only on the next readout
+    for (const id of ['windFrom', 'windBar']) $(id).addEventListener('pointermove', paint);
+    $('windFrom').addEventListener('keydown', paint); $('windBar').addEventListener('keydown', paint);
     this.paints.push(paint); paint();
   }
 

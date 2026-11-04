@@ -6,7 +6,7 @@
 <title>Sea bench · system 01</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono:wght@400&family=Instrument+Serif:ital@1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Instrument+Serif:ital@1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <canvas id="c" aria-label="Water column, FFT sea simulation"></canvas>
@@ -40,7 +40,24 @@
       <nav class="dots" id="segPreset" aria-label="Sea state presets">
         <button type="button" data-v="calm">Calm</button><button type="button" data-v="moderate" aria-pressed="true">Moderate</button><button type="button" data-v="fresh">Fresh</button><button type="button" data-v="storm">Storm</button>
       </nav>
-      <div id="slWind"></div><div id="slFrom"></div><div id="slFetch"></div><div id="slSpread"></div><div id="slGamma"></div><div id="slHeight"></div><div id="slRipple"></div>
+      <div class="windrow">
+        <div class="ring" id="windFrom" role="slider" tabindex="0" aria-label="Wind from">
+          <svg viewBox="0 0 148 148" aria-hidden="true">
+            <circle class="rim" cx="74" cy="74" r="73.5"/>
+            <text x="74" y="16" text-anchor="middle">N</text><text x="135" y="77" text-anchor="middle">E</text><text x="74" y="138" text-anchor="middle">S</text><text x="13" y="77" text-anchor="middle">W</text>
+            <circle class="dot" cx="74" cy="11" r="7"/>
+          </svg>
+          <div class="mid"><div class="big" id="windKn">12.0</div><div class="unit">knots</div><div class="sub" id="windFromVal">090° E</div></div>
+        </div>
+        <dl class="wdata">
+          <div><dt>Beaufort</dt><dd id="wBft"></dd></div>
+          <div><dt>Waves</dt><dd id="wHs"></dd></div>
+          <div><dt>Period</dt><dd id="wTp"></dd></div>
+          <div><dt>Length</dt><dd id="wLp"></dd></div>
+        </dl>
+        <div class="vbar" id="windBar" role="slider" tabindex="0" aria-label="Wind"><div class="in"><div class="fill"></div></div></div>
+      </div>
+      <div id="slFetch"></div><div id="slSpread"></div><div id="slGamma"></div><div id="slHeight"></div><div id="slRipple"></div>
     </div></div>
   </section>
   <section class="folder" id="fSwell">

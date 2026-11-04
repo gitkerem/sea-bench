@@ -31,6 +31,12 @@ export function shareUrl(state: BenchState): string {
 
 export const seaWord = (hs: number) => hs < 0.1 ? 'glassy' : hs < 0.3 ? 'calm sea' : hs < 0.6 ? 'moderate sea' : hs < 1.0 ? 'fresh sea' : hs < 1.6 ? 'rough sea' : 'storm';
 
+/** Beaufort force for a mean wind in knots, with its name: the upper edge of each force, rounded as the scale is
+ *  usually printed (the dinghy simulator's table) */
+const BFT_TOP = [1, 3.5, 6.5, 10.5, 16.5, 21.5, 27.5, 33.5, 40.5, 47.5];
+const BFT_NAME = ['calm', 'light air', 'light', 'gentle', 'moderate', 'fresh', 'strong', 'near gale', 'gale', 'strong gale', 'storm'];
+export const beaufort = (kn: number) => { const i = BFT_TOP.findIndex((top) => kn < top), n = i < 0 ? BFT_TOP.length : i; return `${n} ${BFT_NAME[n]}`; };
+
 export const compass = (d: number) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(((d % 360) + 360) % 360 / 22.5) % 16];
 
 /** Time of day → sun: up in the east at 06:00, highest at noon, down in the west at 18:00; low and warm through the night. */

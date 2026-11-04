@@ -62,7 +62,8 @@ reference/            the single-file artifact this was extracted from, as publi
   is `data-theme="dark"` on `<html>`.
 - The controls are the shared plate in `src/controls/` (exported as `sea-bench/controls`, with
   `controls/tokens.css` and `controls/controls.css`), the same kit the dinghy simulator draws its panel with: the
-  dinghy's instrument plate (Geist Mono, plate fill, italic serif notes) with round slider knobs. Change a control
+  dinghy's instrument plate (plate fill, italic serif notes) in Space Mono, with round slider knobs; the wind is the
+  dinghy's row: a compass ring for where it comes from, an upright bar for how hard, the figures between. Change a control
   there and it changes in both apps; anything only the bench shows stays in `src/bench/style.css`. Controls own no
   state (`get`/`set`, labels as plain text). Readouts change through `ui.tick()` (a 320 ms dip), never a flap.
 - Comments say why, in plain English. No decoration.

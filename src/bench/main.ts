@@ -4,7 +4,7 @@ import './style.css';
 import * as THREE from 'three/webgpu';
 import { SeaSim, SeaColumn, seaStats, swellAmpForHs, travelFromCompass, G, type SeaParams } from '../sea';
 import { BenchUI, $ } from './ui';
-import { loadState, DEFAULTS, shareUrl, seaWord, compass, sunFromTod, type BenchState } from './state';
+import { loadState, DEFAULTS, shareUrl, seaWord, compass, beaufort, sunFromTod, type BenchState } from './state';
 import { BenchCamera } from './camera';
 import { startAnalytics } from './analytics';
 import { typeTitle } from './title';
@@ -64,6 +64,7 @@ async function main() {
     ui.tick($('vState'), seaWord(hs)); ui.tick($('vHs'), hs.toFixed(2) + ' m'); ui.tick($('vTp'), st.tp.toFixed(1) + ' s');
     ui.tick($('vLp'), st.lambdaP.toFixed(0) + ' m'); ui.tick($('vSteep'), steep ? '1/' + steep : '—');
     ui.tick($('vWind'), `${S.windKn} kn from ${compass(S.windFrom)}`); ui.tick($('vSeed'), String(sea.U.seed.value));
+    $('wBft').textContent = beaufort(S.windKn); $('wHs').textContent = hs.toFixed(2) + ' m'; $('wTp').textContent = st.tp.toFixed(1) + ' s'; $('wLp').textContent = st.lambdaP.toFixed(0) + ' m';
     $('seaTag').textContent = ui.preset || 'custom';
   }
 
@@ -79,8 +80,7 @@ async function main() {
 
   // ---------- controls
   const seaIn = ui.seaIn, lookIn = () => applyLook();
-  ui.slider('slWind',     { label: 'Wind',         min: 2,    max: 40,  step: 0.5,  key: 'windKn',   fmt: (v) => v.toFixed(1) + ' kn', onInput: seaIn });
-  ui.slider('slFrom',     { label: 'Wind from',    min: 0,    max: 359, step: 1,    key: 'windFrom', fmt: (v) => String(v).padStart(3, '0') + '° ' + compass(v), onInput: seaIn });
+  ui.windRow(seaIn);
   ui.slider('slFetch',    { label: 'Fetch',        min: 2,    max: 60,  step: 1,    key: 'fetchKm',  fmt: (v) => v + ' km', onInput: seaIn });
   ui.slider('slSpread',   { label: 'Spread',       min: 1,    max: 16,  step: 0.5,  key: 'spread',   fmt: (v) => (v <= 1.5 ? 'wide' : v <= 3 ? 'open' : v <= 8 ? 'narrow' : 'long crests'), onInput: seaIn, snap: [1, 2, 5, 12] });
   ui.slider('slGamma',    { label: 'Peakedness',   min: 1,    max: 7,   step: 0.1,  key: 'gamma',    fmt: (v) => 'γ ' + v.toFixed(1), onInput: seaIn });

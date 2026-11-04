@@ -1,6 +1,6 @@
 /**
  * The plate's controls, shared by the sea bench and the dinghy simulator: folders, sliders on a tick scale with a
- * round knob, dots, switches, buttons, a knob dial and a ring you drag a dot round. Each control owns no state: it
+ * round knob, dots, switches, buttons, a knob dial, a ring you drag a dot round and an upright bar. Each control owns no state: it
  * reads through `get`, writes through `set`, and returns a `paint` to call when the value changed elsewhere. Labels
  * come in as plain text, so an app can run them through its own translations. Hand-written DOM, styled by
  * controls.css from the tokens in tokens.css.
@@ -126,6 +126,30 @@ export function ring(host: HTMLElement | string, o: RingOpts): Paint {
   dragOn(r, (e) => { const b = r.getBoundingClientRect(); to(Math.round(Math.atan2(e.clientX - b.left - b.width / 2, b.top + b.height / 2 - e.clientY) * R2D / step) * step); });
   keysOn(r, (dir, shift) => to(o.get() + dir * (shift ? fine : step)));
   r.setAttribute('aria-valuemin', '0'); r.setAttribute('aria-valuemax', '359');
+  paint();
+  return paint;
+}
+
+export interface BarOpts {
+  min: number; max: number;
+  get: () => number; set: (v: number) => void;
+  /** the drag's step and an arrow key's; Shift takes `big` */
+  step: number; big?: number;
+  text?: (v: number) => string;
+}
+
+/** An upright bar filled from the bottom, for a strength (the wind's): press or drag anywhere on it; arrow keys when
+ *  focused. `host` is the focusable element (role="slider") holding `.in > .fill`. */
+export function vbar(host: HTMLElement | string, o: BarOpts): Paint {
+  const b = el(host), fill = b.querySelector<HTMLElement>('.fill')!, big = o.big ?? o.step * 5;
+  const paint = () => {
+    const v = o.get(); fill.style.height = (clamp((v - o.min) / (o.max - o.min), 0, 1) * 100) + '%';
+    b.setAttribute('aria-valuenow', String(v)); if (o.text) b.setAttribute('aria-valuetext', o.text(v));
+  };
+  const to = (v: number) => { v = clamp(+(Math.round(v / o.step) * o.step).toFixed(4), o.min, o.max); if (v !== o.get()) { o.set(v); paint(); } };
+  dragOn(b, (e) => { const r = b.getBoundingClientRect(); to(o.min + (r.bottom - 3 - e.clientY) / (r.height - 6) * (o.max - o.min)); });
+  keysOn(b, (dir, shift) => to(o.get() + dir * (shift ? big : o.step)));
+  b.setAttribute('aria-valuemin', String(o.min)); b.setAttribute('aria-valuemax', String(o.max));
   paint();
   return paint;
 }
