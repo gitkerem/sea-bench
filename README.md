@@ -29,7 +29,7 @@ The package exports `src/sea` as TypeScript source, for a Vite + TypeScript proj
 three as your own dependency (it is a peer, so there is only ever one copy):
 
 ```
-npm install three@0.186.0 github:gitkerem/sea-bench#v0.5.0
+npm install three@0.186.0 github:gitkerem/sea-bench#v0.5.1
 ```
 
 ```ts
@@ -68,11 +68,22 @@ sea.U.off.value.set(waterX, waterZ); // what you've covered through the water
 column.setBedOffset(groundX, groundZ); // and over the ground (they differ when a current runs)
 ```
 
+## Versions
+
+The bench shows a prototype name in its title and the page name: **001** is this prototype, the water column, and
+the letter moves on with each release you'd notice (a rethink starts **002.A**). Git tags stay semver underneath, and
+the dinghy installs from those.
+
+| Name | Tags | What changed |
+|---|---|---|
+| 001.A | v0.1.0 – v0.4.0 | the water column, its bench, the chopped sea under the hull |
+| 001.B | v0.5.0 – | the instrument panel, shared with the dinghy simulator (`sea-bench/controls`) |
+
 ## Layout
 
 ```
 src/sea      the sea: spectrum, noise, GPU kernels, CPU sampler, shading, column
-src/controls the plate's controls, shared with the dinghy simulator (sea-bench/controls)
+src/controls the instrument panel's controls, shared with the dinghy simulator (sea-bench/controls)
 src/bench    the bench app: state, its panel, camera, main
 test         vitest — the FFT formulation against a naive DFT, the spectrum's numbers
 docs         SEA-MODEL.md (physics + conventions), DESIGN.md (system 01), HANDOFF.md

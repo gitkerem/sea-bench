@@ -67,6 +67,14 @@ reference/            the single-file artifact this was extracted from, as publi
   there and it changes in both apps; anything only the bench shows stays in `src/bench/style.css`. Controls own no
   state (`get`/`set`, labels as plain text). Readouts change through `ui.tick()` (a 320 ms dip), never a flap.
 - Comments say why, in plain English. No decoration.
+- The right-hand panel is the **instrument panel** when talking to people (in code and the older docs, "the plate").
+
+## Versions
+
+The title and the page name (`<title>`) carry a prototype name, **001.B** now: the number is the prototype (001, the
+water column; a rethink is 002.A), the letter moves on with each release a person would notice. Bump it in
+`index.html` (title, the meta's Prototype and Date, `<title>`) and add a row to the README's Versions table. Tags stay
+semver (`vX.Y.Z`, the package version matching); a fix that nobody sees is a patch tag under the same letter.
 
 ## Known gaps / next
 
