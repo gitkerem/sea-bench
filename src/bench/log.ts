@@ -40,8 +40,7 @@ export function createLog(): void {
   const reset = () => { f.version = 'all'; f.kind = 'all'; f.small = true; paintV(); paintS(); paint(); };
 
   // ---- head
-  const close = h('button', { type: 'button', class: 'btn ico', 'aria-label': 'Close the change log' });
-  close.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  const close = h('button', { type: 'button', class: 'txtbtn', 'aria-label': 'Close the change log' }, 'Close');
   const sum = h('p', { class: 'sum' });
   const head = h('header', { class: 'log-h' }, h('div', null, h('h2', { id: 'logTitle' }, 'Change log'), sum), close);
 

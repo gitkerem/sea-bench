@@ -69,10 +69,11 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 /* ===== change log: the button by the version, a side drawer, the bench easing back behind it (log.ts) ===== */
 .tline{display:flex;align-items:center;gap:12px;width:max-content;margin:0 0 14px;pointer-events:auto}
 /* waits out of sight beside the version; hovering the title slides it in from the left */
-.logbtn{flex:none;margin:-6px 0;padding:6px 0;border:0;background:none;color:var(--ink-2);cursor:pointer;
-  font:400 9.5px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;
-  opacity:0;transform:translateX(-10px);transition:opacity 220ms var(--ease),transform 280ms var(--ease),color 160ms}
-.logbtn:hover,.logbtn[aria-expanded="true"]{color:var(--ink)}
+/* a small text button: the change log's Changelog and Close */
+.txtbtn,.logbtn{flex:none;padding:6px 0;border:0;background:none;color:var(--ink-2);cursor:pointer;
+  font:400 9.5px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;transition:color 160ms}
+.txtbtn:hover,.logbtn:hover,.logbtn[aria-expanded="true"]{color:var(--ink)}
+.logbtn{margin:-6px 0;opacity:0;transform:translateX(-10px);transition:opacity 220ms var(--ease),transform 280ms var(--ease),color 160ms}
 .tline:hover .logbtn,.logbtn:focus-visible,.logbtn[aria-expanded="true"]{opacity:1;transform:none}
 @media (hover:none){.logbtn{opacity:1;transform:none}}
 
@@ -84,8 +85,11 @@ body.logopen{background:color-mix(in srgb,var(--ink) 12%,var(--scene))}
 .page::after{content:"";position:absolute;inset:0;z-index:30;background:var(--scene);opacity:0;pointer-events:none;transition:opacity 520ms var(--ease)}
 body.logopen .page{transform:translateX(-16px) scale(.92);border-radius:var(--r-plate);overflow:hidden;box-shadow:0 0 0 1px var(--line)}
 body.logopen .page::after{opacity:.35}
-.logscrim{position:fixed;inset:0;z-index:40;display:none}
-body.logopen .logscrim{display:block}
+/* the bench goes slightly soft behind the drawer: one backdrop blur on the scrim, faded in with it, and skipped
+   entirely (visibility hidden) while the drawer is shut */
+.logscrim{position:fixed;inset:0;z-index:40;opacity:0;visibility:hidden;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  transition:opacity 520ms var(--ease),visibility 0s 520ms}
+body.logopen .logscrim{opacity:1;visibility:visible;transition:opacity 520ms var(--ease)}
 
 .log{position:fixed;z-index:50;top:12px;bottom:12px;left:12px;width:min(400px,calc(100vw - 24px));display:flex;flex-direction:column;
   background:var(--plate);color:var(--ink);border:1px solid var(--line);border-radius:var(--r-plate);outline:0;font:400 12px/1.45 var(--hud);
@@ -94,7 +98,7 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .log-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 18px 14px 20px;border-bottom:1px solid var(--line)}
 .log-h h2{margin:2px 0 0;font:400 13px/1 var(--hud);letter-spacing:.24em;text-transform:uppercase}
 .log-h .sum{margin:8px 0 0;font:400 10.5px/1 var(--hud);letter-spacing:.04em;color:var(--ink-2)}
-.log .btn.ico svg path{stroke:currentColor}
+.log-h .txtbtn{margin:-4px 0 0}
 .log-s{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 
 /* filters */
@@ -179,7 +183,7 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
   .log{top:0;bottom:0;left:0;width:100vw;border-radius:0;border:0}
   body.logopen .page{transform:scale(.94);transform-origin:50% 50%}
 }
-@media (prefers-reduced-motion:reduce){body.logopen .page{transform:none;border-radius:0}.page,.page::after,.log,body.logopen .log,.logbtn{transition:none}}
+@media (prefers-reduced-motion:reduce){body.logopen .page{transform:none;border-radius:0}.page,.page::after,.log,body.logopen .log,.logbtn,.logscrim,body.logopen .logscrim{transition:none}}
 @media (max-width:1180px){.hdr .meta dl:nth-child(3){display:none}}
 @media (max-width:980px){.hdr .meta dl:nth-child(2){display:none}}
 @media (max-width:720px){

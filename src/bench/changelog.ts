@@ -112,5 +112,5 @@ export const ENTRIES: Entry[] = [
     text: 'The title, the page name and this log say v0.05.2 in place of a prototype letter; the git tag is v0.5.2.' },
   { at: '2026-11-03T19:25', version: 'v0.5.2', kind: 'improved', size: 1,
     title: 'Plainer icons, and a Changelog label',
-    text: 'The panel’s buttons are drawn with a line, a dot or an arrow; the change log opens from a small text button beside the version.' },
+    text: 'The panel’s buttons are drawn with a line, a dot or an arrow. The change log opens from a small Changelog label and shuts with Close, over a softly blurred bench.' },
 ];
