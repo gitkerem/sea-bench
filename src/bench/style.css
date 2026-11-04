@@ -2,7 +2,7 @@
    controls, colours and type the dinghy simulator uses too. Only where things sit on this page lives here. */
 :root{
   color-scheme:light;
-  --scene:#ECE9E1;--hud:"Space Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --scene:#ECE9E1;--hud:"Space Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--scene:#1A1B19}}

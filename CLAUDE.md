@@ -58,11 +58,11 @@ reference/            the single-file artifact this was extracted from, as publi
 
 ## Style
 
-- The page: paper `--scene`, one red, hairlines; the header is a Space Mono HUD (`--hud`), prose is Geist. Dark mode
+- The page: paper `--scene`, one red, hairlines; everything is Space Mono, the header's HUD (`--hud`) and the prose alike. Dark mode
   is `data-theme="dark"` on `<html>`.
 - The controls are the shared plate in `src/controls/` (exported as `sea-bench/controls`, with
   `controls/tokens.css` and `controls/controls.css`), the same kit the dinghy simulator draws its panel with: the
-  dinghy's instrument plate (plate fill, italic serif notes) in Space Mono, with round slider knobs; the wind is the
+  dinghy's instrument plate (plate fill, quiet lower-case notes) in Space Mono, the page's only face, with round slider knobs; the wind is the
   dinghy's row: a compass ring for where it comes from, an upright bar for how hard, the figures between. Change a control
   there and it changes in both apps; anything only the bench shows stays in `src/bench/style.css`. Controls own no
   state (`get`/`set`, labels as plain text). Readouts change through `ui.tick()` (a 320 ms dip), never a flap.

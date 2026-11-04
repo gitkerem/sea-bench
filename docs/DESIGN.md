@@ -19,7 +19,7 @@ Dark mode is `data-theme="dark"` on `<html>`; the switch top-right remembers the
 
 - **Space Mono** for anything numeric or label-like: readouts, folder titles, slider labels and values, buttons.
   Small, uppercase, tracked (`letter-spacing: .08em`).
-- **Geist** for the few sentences of prose (hints, the no-WebGPU message).
+- **Space Mono** for the few sentences of prose too (hints, the no-WebGPU message): the whole page is one mono.
 - **Michroma** only ever for a wordmark; currently unused on the bench (the title was removed).
 
 ## Components

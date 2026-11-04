@@ -6,12 +6,12 @@
 .hint{font:400 12px/1.45 var(--sans);color:var(--ink-2);padding:0 2px;margin:0}
 kbd{font:400 10px/1 var(--mono);padding:2px 5px;border-radius:4px;border:1px solid var(--line-2)}
 
-/* folders: a mono header with an italic note and a chevron, hairlines between */
+/* folders: a mono header with a quieter lower-case note and a chevron, hairlines between */
 .folder{border-top:1px solid var(--line)}
 .folder:first-of-type{border-top:0}
 .fh{display:flex;align-items:baseline;gap:10px;width:100%;height:44px;border:0;background:none;color:var(--ink);cursor:pointer;padding:0 2px;
   font:400 11px/44px var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.fh .c{font:italic 400 15px/1 var(--serif);letter-spacing:0;text-transform:none;color:var(--ink-2)}
+.fh .c{font:400 10.5px/1 var(--mono);letter-spacing:.04em;text-transform:none;color:var(--ink-2)}
 .fh svg{margin-left:auto;align-self:center;transition:transform 220ms var(--ease);color:var(--ink-2)}
 .folder.closed .fh svg{transform:rotate(-90deg)}
 .fb{display:grid;grid-template-rows:1fr;transition:grid-template-rows 260ms var(--ease)}
