@@ -106,8 +106,16 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .log-f{display:flex;flex-direction:column;gap:16px;padding:16px 24px 24px;border-bottom:1px solid var(--line)}
 .frow{display:flex;flex-direction:column;gap:8px}
 .frow>.lab,.log-f .switch .lab{color:var(--ink-2);font-size:9.5px}
-.log-f .dots{flex-wrap:wrap;height:auto;column-gap:0;margin:-4px 0}
-.log-f .dots button{flex:none;gap:6px;height:28px;padding:0 8px 0 0}
+.frow.line{flex-direction:row;align-items:center;justify-content:space-between;gap:16px}
+/* the version dropdown: a native select, so it is keyboard- and phone-friendly, drawn as a hairline pill with a
+   line chevron */
+.sel{position:relative;display:inline-flex;min-width:0}
+.sel select{appearance:none;-webkit-appearance:none;max-width:100%;height:28px;padding:0 32px 0 12px;border:1px solid var(--line-2);border-radius:var(--r-pill);
+  background:none;color:var(--ink);cursor:pointer;font:400 10.5px/1 var(--hud);letter-spacing:.02em;text-overflow:ellipsis;transition:background 160ms,border-color 160ms}
+.sel select:hover{background:var(--well)}
+.sel select:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.sel option{background:var(--plate);color:var(--ink)}
+.sel svg{position:absolute;right:12px;top:50%;width:12px;height:12px;margin-top:-6px;pointer-events:none;fill:none;stroke:var(--ink);stroke-width:1;stroke-linecap:round}
 .log-f .switch{height:auto}
 /* a version reads v0.5.2, lower-case v, even where the type around it is set in capitals */
 .vtx,.hdr .title .v,.meta .ver{text-transform:none}

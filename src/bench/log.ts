@@ -3,10 +3,10 @@
  * Opening it eases the whole bench back (a CSS scale, nothing re-rendered) while the drawer slides in from the left.
  * Inside, one readable column: filters for version, kind and the small changes, then the changes newest first,
  * release by release on one rail: a node for the kind, a title, a line. Each release's head is pinned while you read it.
- * Releases are the git tags (v0.5.2); the version filter groups them by minor series (v0.5).
+ * Releases are the git tags (v0.5.2), shown as v0.05.2; the version filter is a dropdown of them.
  */
-import { ENTRIES, VERSIONS, series, show, type Kind } from './changelog';
-import { dots, toggle } from '../controls';
+import { ENTRIES, VERSIONS, show, type Kind } from './changelog';
+import { toggle } from '../controls';
 
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const KINDS: Kind[] = ['new', 'improved', 'fixed', 'system'];
@@ -29,12 +29,10 @@ export function createLog(): void {
   const btn = document.getElementById('bLog')!, drawer = document.getElementById('log')!, scrim = document.getElementById('logScrim')!, page = document.getElementById('page')!;
   const current = VERSIONS[VERSIONS.length - 1].id;
   const f = { version: 'all', kind: 'all' as Kind | 'all', small: true };
-  // the minor series, newest first: v0.5, v0.4 …
-  const SERIES = [...new Set(VERSIONS.map((v) => series(v.id)))].reverse();
   type E = (typeof ENTRIES)[number];
-  const inVersion = (e: E) => f.version === 'all' || series(e.version) === f.version;
+  const inVersion = (e: E) => f.version === 'all' || e.version === f.version;
   const shown = (e: E) => inVersion(e) && (f.kind === 'all' || e.kind === f.kind) && (f.small || e.size > 1);
-  const reset = () => { f.version = 'all'; f.kind = 'all'; f.small = true; paintV(); paintS(); paint(); };
+  const reset = () => { f.version = 'all'; f.kind = 'all'; f.small = true; vSel.value = 'all'; paintS(); paint(); };
 
   // ---- head
   const close = h('button', { type: 'button', class: 'txtbtn', 'aria-label': 'Close the change log' }, 'Close');
@@ -42,15 +40,19 @@ export function createLog(): void {
   const head = h('header', { class: 'log-h' }, h('div', null, h('h2', { id: 'logTitle' }, 'Change log'), sum), close);
 
   // ---- filters: which version, which kind, and whether the small changes show
-  const vDots = h('div', { class: 'dots', role: 'group', 'aria-label': 'Version' },
-    ...['all', ...SERIES].map((v) => h('button', { type: 'button', 'data-v': v }, v === 'all' ? 'All' : ver(v))));
+  // the version: a dropdown of every release, newest first, so the list can grow without crowding the drawer
+  const vSel = h('select', { id: 'logVer', 'aria-label': 'Version' },
+    h('option', { value: 'all' }, 'All releases'),
+    ...[...VERSIONS].reverse().map((v) => h('option', { value: v.id }, `${show(v.id)} · ${v.name}`))) as HTMLSelectElement;
+  const vPick = h('span', { class: 'sel' }, vSel);
+  vPick.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg>');
   const kChips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Kind' },
     ...(['all', ...KINDS] as const).map((k) => h('button', { type: 'button', class: 'chip', 'data-v': k },
       k !== 'all' ? h('span', { class: `node k-${k}`, 'aria-hidden': 'true' }) : null, k === 'all' ? 'All' : KIND[k], h('em'))));
   const small = h('button', { type: 'button', class: 'switch', role: 'switch', 'aria-checked': 'true' },
     h('span', { class: 'lab' }, 'Small changes'), h('span', { class: 'track' }, h('span', { class: 'knob' })));
   const filters = h('div', { class: 'log-f' },
-    h('div', { class: 'frow' }, h('span', { class: 'lab' }, 'Version'), vDots),
+    h('label', { class: 'frow line', for: 'logVer' }, h('span', { class: 'lab' }, 'Version'), vPick),
     h('div', { class: 'frow' }, h('span', { class: 'lab' }, 'Kind'), kChips),
     small);
 
@@ -86,7 +88,7 @@ export function createLog(): void {
     list.replaceChildren(...(sections.length ? sections : [empty]));
   }
 
-  const paintV = dots(vDots, { get: () => f.version, set: (v) => { f.version = v; paint(); } });
+  vSel.addEventListener('change', () => { f.version = vSel.value; paint(); });
   const paintS = toggle(small, { get: () => f.small, set: (v) => { f.small = v; paint(); } });
   kChips.addEventListener('click', (e) => { const b = (e.target as Element).closest<HTMLElement>('.chip'); if (b) { f.kind = b.dataset.v as Kind | 'all'; paint(); } });
   empty.querySelector('button')!.addEventListener('click', reset);

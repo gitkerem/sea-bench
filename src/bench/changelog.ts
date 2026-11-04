@@ -36,8 +36,6 @@ export interface Entry {
 }
 
 
-/** the minor series a release belongs to, `v0.5.2` → `v0.5`: what the version filter and the strip group by */
-export const series = (id: string) => id.split('.').slice(0, 2).join('.');
 /** how a version reads on screen: the minor in two digits, `v0.5.2` → `v0.05.2`. Display only; tags stay semver,
  *  since npm won't take a leading zero. */
 export const show = (id: string) => id.replace(/^v(\d+)\.(\d+)/, (_, a: string, b: string) => `v${a}.${b.padStart(2, '0')}`);
@@ -115,5 +113,5 @@ export const ENTRIES: Entry[] = [
     text: 'Buttons drawn with a line, a dot or an arrow; small ghost buttons for the rest.' },
   { at: '2026-11-03T19:50', version: 'v0.5.2', kind: 'improved', size: 1,
     title: 'A simpler change log',
-    text: 'One rail, a title and a line per change; a wider drawer over a darker, softer bench.' },
+    text: 'One rail, a title and a line per change; the versions in a dropdown; a wider drawer over a softer bench.' },
 ];
