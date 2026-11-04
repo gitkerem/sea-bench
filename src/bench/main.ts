@@ -1,3 +1,5 @@
+import '../controls/tokens.css';
+import '../controls/controls.css';
 import './style.css';
 import * as THREE from 'three/webgpu';
 import { SeaSim, SeaColumn, seaStats, swellAmpForHs, travelFromCompass, G, type SeaParams } from '../sea';
@@ -29,7 +31,7 @@ async function main() {
   const scene = new THREE.Scene();
   scene.add(column);
   const look = column.look;
-  const cam = new BenchCamera(canvas, new THREE.Vector3(0, 1.7 * 0.55, 0), 9.4, () => (window.innerWidth > 720 ? 280 + 22 + 18 : 0));
+  const cam = new BenchCamera(canvas, new THREE.Vector3(0, 1.7 * 0.55, 0), 9.4, () => (window.innerWidth > 720 ? 320 + 16 + 18 : 0));
   $('vGrid').textContent = `${N}² · ${sea.cascades.length} cascades`;
 
   // ---------- state → sea

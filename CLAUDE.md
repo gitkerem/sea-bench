@@ -29,7 +29,8 @@ src/sea/              the reusable sea — no DOM, no bench knowledge
   shading.ts          Look uniforms + materials: surface, wall, seabed, rocks, ground
   column.ts           SeaColumn: the geometry wired to the materials (one Group)
   fft-reference.ts    the pipeline in plain JS — the oracle for the tests, not used at runtime
-src/bench/            the bench app: state, controls, camera, main
+src/controls/         the plate kit both apps share: sliders, dials, rings, dots, switches, folders + their CSS
+src/bench/            the bench app: state, its panel, camera, main
 index.html            bench markup (system 01)
 test/                 vitest
 docs/                 SEA-MODEL (physics + conventions), DESIGN (system 01), HANDOFF (history, next)
@@ -57,10 +58,13 @@ reference/            the single-file artifact this was extracted from, as publi
 
 ## Style
 
-- system 01: paper `--scene`, one red, hairlines, Space Mono for anything numeric, Geist for prose, Michroma only
-  for a wordmark. Tokens live in `src/bench/style.css`; dark mode is `data-theme="dark"` on `<html>`.
-- Controls are the plate's: round black buttons with the label beneath, flat sliders with a black circle knob,
-  ticks only where a slider snaps. Readouts change through `ui.tick()` (a 320 ms dip), never a flap.
+- The page: paper `--scene`, one red, hairlines; the header is a Space Mono HUD (`--hud`), prose is Geist. Dark mode
+  is `data-theme="dark"` on `<html>`.
+- The controls are the shared plate in `src/controls/` (exported as `sea-bench/controls`, with
+  `controls/tokens.css` and `controls/controls.css`), the same kit the dinghy simulator draws its panel with: the
+  dinghy's instrument plate (Geist Mono, plate fill, italic serif notes) with round slider knobs. Change a control
+  there and it changes in both apps; anything only the bench shows stays in `src/bench/style.css`. Controls own no
+  state (`get`/`set`, labels as plain text). Readouts change through `ui.tick()` (a 320 ms dip), never a flap.
 - Comments say why, in plain English. No decoration.
 
 ## Known gaps / next

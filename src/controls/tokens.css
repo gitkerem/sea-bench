@@ -1,0 +1,16 @@
+/* The plate's tokens: the colours, radii and type every control in controls.css is drawn with, light and dark.
+   An app adds its own scene colours beside these; overriding one here changes it on every control at once. */
+:root{
+  --plate:#e7e8e3;--well:#dcdfd9;--ink:#1e2022;--ink-2:rgba(30,32,34,.56);--line:rgba(30,32,34,.22);--line-2:rgba(30,32,34,.5);
+  --disc:#1e2022;--on-disc:#eef0ea;--red:#e5322d;--r-plate:24px;--r-card:20px;--r-pill:999px;
+  --mono:'Geist Mono','Space Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:'Geist','Stack Sans Headline',system-ui,Arial,sans-serif;
+  --serif:'Instrument Serif',Georgia,'Times New Roman',serif;
+  --ease:cubic-bezier(.25,1,.5,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --plate:#1b1d1e;--well:#242729;--ink:#ebece7;--ink-2:rgba(235,236,231,.58);--line:rgba(235,236,231,.22);--line-2:rgba(235,236,231,.5);
+  --disc:#ebece7;--on-disc:#1b1d1e;--red:#ef4a44}}
+:root[data-theme="dark"]{
+  --plate:#1b1d1e;--well:#242729;--ink:#ebece7;--ink-2:rgba(235,236,231,.58);--line:rgba(235,236,231,.22);--line-2:rgba(235,236,231,.5);
+  --disc:#ebece7;--on-disc:#1b1d1e;--red:#ef4a44}

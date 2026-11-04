@@ -72,7 +72,8 @@ column.setBedOffset(groundX, groundZ); // and over the ground (they differ when 
 
 ```
 src/sea      the sea: spectrum, noise, GPU kernels, CPU sampler, shading, column
-src/bench    the bench app: state, controls, camera, main
+src/controls the plate's controls, shared with the dinghy simulator (sea-bench/controls)
+src/bench    the bench app: state, its panel, camera, main
 test         vitest — the FFT formulation against a naive DFT, the spectrum's numbers
 docs         SEA-MODEL.md (physics + conventions), DESIGN.md (system 01), HANDOFF.md
 reference    the single-file artifact this was extracted from

@@ -7,10 +7,14 @@
   "repository": "github:gitkerem/sea-bench",
   "type": "module",
   "exports": {
-    ".": "./src/sea/index.ts"
+    ".": "./src/sea/index.ts",
+    "./controls": "./src/controls/index.ts",
+    "./controls/controls.css": "./src/controls/controls.css",
+    "./controls/tokens.css": "./src/controls/tokens.css"
   },
   "files": [
     "src/sea",
+    "src/controls",
     "LICENSE",
     "README.md"
   ],
