@@ -102,7 +102,10 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .log-f{display:flex;flex-direction:column;gap:6px;padding:10px 20px 6px}
 .frow{display:flex;flex-direction:column;gap:2px}
 .frow>.lab{color:var(--ink-2);font-size:9.5px;padding-top:6px}
-.log-f .dots button{flex:none;padding:0 12px 0 0}
+.log-f .dots{flex-wrap:wrap;height:auto}
+.log-f .dots button{flex:none;gap:6px;height:30px;padding:0 6px 0 0}
+/* a version reads v0.5.2, lower-case v, even where the type around it is set in capitals */
+.log-f .dots button[data-v^="v"],.vmeta a,.hdr .title .v,.meta .ver{text-transform:none}
 .chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0 4px}
 .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid var(--line-2);border-radius:var(--r-pill);background:none;color:var(--ink);cursor:pointer;
   font:400 10px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;transition:background 160ms,color 160ms,border-color 160ms}
@@ -122,7 +125,7 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .node.k-system{border-radius:2px}
 
 /* the strip: a tick per change, taller for bigger ones, the versions bracketed under it */
-.strip{position:relative;height:64px;margin:10px 26px 4px}
+.strip{position:relative;height:72px;margin:10px 26px 4px}
 .strip::before{content:"";position:absolute;left:-6px;right:-6px;top:30px;height:1px;background:var(--ink)}
 .strip .tk{position:absolute;bottom:34px;width:13px;margin-left:-6.5px;padding:0;border:0;background:none;cursor:pointer;display:flex;justify-content:center;transition:opacity 200ms}
 .strip .tk::before{content:"";width:1px;background:var(--ink)}
@@ -132,6 +135,7 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .strip .vb{position:absolute;top:40px;height:5px;border:1px solid var(--line-2);border-top:0;min-width:1px}
 .strip .vb span{position:absolute;top:8px;left:0;font:400 9px/1 var(--hud);letter-spacing:.08em;color:var(--ink-2);white-space:nowrap}
 .strip .vb.cur{border-color:var(--red)}.strip .vb.cur span{color:var(--red)}
+.strip .vb.lo span{top:19px}
 .strip .cut{position:absolute;top:0;height:46px;border-left:1px dashed var(--red)}
 
 /* the list: versions newest first, the head of the one you are in pinned to the top */
@@ -145,6 +149,7 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .ver.cur .vr{color:var(--red)}
 .vmeta{display:grid;grid-template-columns:64px 1fr;row-gap:3px;margin:12px 20px 0;font:400 10px/1.5 var(--hud);letter-spacing:.03em;text-transform:uppercase;font-variant-numeric:tabular-nums}
 .vmeta dt{color:var(--ink-2)}.vmeta dd{margin:0}
+.vmeta a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line)}.vmeta a:hover{border-color:var(--ink)}
 .ver figure{margin:12px 20px 4px}
 .ver img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line);border-radius:8px}
 .ver figcaption{margin-top:6px;font:400 10px/1.45 var(--hud);color:var(--ink-2)}
@@ -162,7 +167,6 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .e .ef{display:flex;gap:10px;align-items:center;margin-top:7px;font:400 9.5px/1 var(--hud);letter-spacing:.04em;color:var(--ink-2)}
 .e .ef a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line)}
 .e .ef a:hover{color:var(--ink);border-color:var(--ink)}
-.e .tag{font-style:normal;color:var(--red);border:1px solid var(--red);border-radius:var(--r-pill);padding:2px 6px}
 .e.flash{background:color-mix(in srgb,var(--red) 10%,transparent);transition:none}
 .vstart{display:flex;justify-content:space-between;margin:2px 20px 22px;padding-top:10px;border-top:1px dashed var(--line-2);font:400 9.5px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .ver.cur .vstart{border-top-color:var(--red)}.ver.cur .vstart span:first-child{color:var(--red)}

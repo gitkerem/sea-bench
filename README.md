@@ -29,7 +29,7 @@ The package exports `src/sea` as TypeScript source, for a Vite + TypeScript proj
 three as your own dependency (it is a peer, so there is only ever one copy):
 
 ```
-npm install three@0.186.0 github:gitkerem/sea-bench#v0.5.1
+npm install three@0.186.0 github:gitkerem/sea-bench#v0.5.2
 ```
 
 ```ts
@@ -70,14 +70,18 @@ column.setBedOffset(groundX, groundZ); // and over the ground (they differ when 
 
 ## Versions
 
-The bench shows a prototype name in its title and the page name: **001** is this prototype, the water column, and
-the letter moves on when a release is called a new one (a rethink starts **002.A**). Git tags stay semver underneath, and
-the dinghy installs from those. Every change is in the bench's change log: hover the version in the title.
+Releases are semver git tags, `vX.Y.Z`, and the package version matches. The title and the page name show the current
+one. Every change is in the bench's change log: hover the version in the title.
 
-| Name | Tags | What changed |
-|---|---|---|
-| 001.A | v0.1.0 – v0.4.0 | the water column, its bench, the chopped sea under the hull |
-| 001.B | v0.5.0 – | the instrument panel, shared with the dinghy simulator (`sea-bench/controls`); Space Mono throughout; scroll over a dial or ring to turn it; the change log |
+| Release | What it brought |
+|---|---|
+| v0.1.0 | the water column and its bench; the sea as a package |
+| v0.2.0 | gusts you can see on the water |
+| v0.3.0 | live at kerem.co; the seabed slides under the column |
+| v0.4.0 | floating things ride the chopped sea they are drawn on |
+| v0.5.0 | the instrument panel, shared with the dinghy simulator (`sea-bench/controls`) |
+| v0.5.1 | the version in the title |
+| v0.5.2 | Space Mono throughout; scroll over a dial or ring to turn it; the change log |
 
 ## Layout
 

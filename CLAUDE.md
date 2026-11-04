@@ -71,19 +71,21 @@ reference/            the single-file artifact this was extracted from, as publi
 
 ## Versions
 
-The title and the page name (`<title>`) carry a prototype name, **001.B** now: the number is the prototype (001, the
-water column; a rethink is 002.A), the letter moves on only when Kerem calls a release a new one; until then
-changes ship as patch tags under the same name. Bump it in
-`index.html` (title, the meta's Prototype and Date, `<title>`) and add a row to the README's Versions table. Tags stay
-semver (`vX.Y.Z`, the package version matching); a fix that nobody sees is a patch tag under the same letter.
+Plain semver, nothing else: the release is its git tag `vX.Y.Z`, `package.json` matches without the v, and the title,
+the meta's Version and the page name (`<title>`) in `index.html` show it. A minor for something people notice (a new
+control, a new look), a patch for the smaller things; Kerem calls a minor. Releasing: bump all four, add the
+`VERSIONS` row, add the README's Versions row, then tag and push (the push deploys kerem.co, so ask first).
+`test/changelog.test.ts` fails if the package, the title and the log disagree. (Until Nov 3 the bench showed
+prototype letters, 001.A and 001.B; Kerem dropped them as confusing.)
 
 ## Change log
 
 Every change gets an entry in `src/bench/changelog.ts`, in the same commit: oldest first, local time as written, the
-version it ships in, its kind (new · improved · fixed · system) and size (1 a detail, 2 a feature, 3 a step), a title
+release it ships in (`v0.5.2`), its kind (new · improved · fixed · system) and size (1 a detail, 2 a feature, 3 a step), a title
 of what people get (≤ 48 characters) and one line (≤ 200). Fill in `commit` for earlier entries once their hash
-exists; the newest can leave it out ("this release"). A new version adds a `VERSIONS` row with a frame of the bench
-(`src/bench/img/<id>.jpg`, 880 px wide). `test/changelog.test.ts` keeps it in order. The drawer is `src/bench/log.ts`, a side drawer:
+exists; the newest can leave it out ("this release"). A new release adds a `VERSIONS` row; one that changes how the bench
+looks gets a frame of it (`src/bench/img/<tag>.jpg`, 880 px wide). The drawer's filter and strip group releases by
+minor series (v0.5). `test/changelog.test.ts` keeps it in order. The drawer is `src/bench/log.ts`, a side drawer:
 hover the version in the title for its button; opening it eases the page back with one CSS scale on `#page`.
 
 ## Known gaps / next

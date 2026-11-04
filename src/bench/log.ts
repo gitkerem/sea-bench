@@ -2,16 +2,18 @@
  * The change log, a side drawer. Its button waits beside the version in the title and slides in when you hover it.
  * Opening it eases the whole bench back (a CSS scale, nothing re-rendered) while the drawer slides in from the left.
  * Inside, one readable column: filters for version, kind and the small changes, a timeline strip you can click,
- * then the changes newest first, version by version, each version's head pinned while you read it.
+ * then the changes newest first, release by release, each release's head pinned while you read it. Releases are
+ * the git tags (v0.5.2); the filter and the strip group them by minor series (v0.5) so they stay legible.
  */
-import { ENTRIES, REPO, VERSIONS, type Kind } from './changelog';
+import { ENTRIES, REPO, VERSIONS, series, type Kind } from './changelog';
 import { dots, toggle } from '../controls';
 
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const KINDS: Kind[] = ['new', 'improved', 'fixed', 'system'];
 const KIND: Record<Kind, string> = { new: 'New', improved: 'Improved', fixed: 'Fixed', system: 'System' };
 /** `2026-11-03T17:35` → `Nov 3, 17:35`, read as written */
-const stamp = (at: string) => `${MON[+at.slice(5, 7) - 1]} ${+at.slice(8, 10)}, ${at.slice(11, 16)}`;
+const stamp = (at: string) => `${day(at)}, ${at.slice(11, 16)}`;
+const day = (at: string) => `${MON[+at.slice(5, 7) - 1]} ${+at.slice(8, 10)}`;
 
 type Attrs = Record<string, string | undefined>;
 function h(tag: string, attrs: Attrs | null = null, ...kids: (Node | string | null | undefined)[]): HTMLElement {
@@ -28,7 +30,9 @@ export function createLog(): void {
   type E = (typeof all)[number];
   const current = VERSIONS[VERSIONS.length - 1].id;
   const f = { version: 'all', kind: 'all' as Kind | 'all', small: true };
-  const inVersion = (e: E) => f.version === 'all' || e.version === f.version;
+  // the minor series, newest first: v0.5, v0.4 …
+  const SERIES = [...new Set(VERSIONS.map((v) => series(v.id)))];
+  const inVersion = (e: E) => f.version === 'all' || series(e.version) === f.version;
   const shown = (e: E) => inVersion(e) && (f.kind === 'all' || e.kind === f.kind) && (f.small || e.size > 1);
   const reset = () => { f.version = 'all'; f.kind = 'all'; f.small = true; paintV(); paintS(); paint(); };
 
@@ -40,7 +44,7 @@ export function createLog(): void {
 
   // ---- filters: which version, which kind, and whether the small changes show
   const vDots = h('div', { class: 'dots', role: 'group', 'aria-label': 'Version' },
-    ...['all', ...[...VERSIONS].reverse().map((v) => v.id)].map((v) => h('button', { type: 'button', 'data-v': v }, v === 'all' ? 'All' : v)));
+    ...['all', ...[...SERIES].reverse()].map((v) => h('button', { type: 'button', 'data-v': v }, v === 'all' ? 'All' : v)));
   const kChips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Kind' },
     ...(['all', ...KINDS] as const).map((k) => h('button', { type: 'button', class: 'chip', 'data-v': k },
       k !== 'all' ? h('span', { class: `node k-${k}`, 'aria-hidden': 'true' }) : null, k === 'all' ? 'All' : KIND[k], h('em'))));
@@ -51,14 +55,15 @@ export function createLog(): void {
     h('div', { class: 'frow' }, h('span', { class: 'lab' }, 'Kind'), kChips),
     small);
 
-  // ---- the strip: every change as a tick, taller for bigger ones, the versions under it; click one to go to it
+  // ---- the strip: every change as a tick, taller for bigger ones, the series under it; click one to go to it.
+  // Labels take turns between two rows, so a series with one change doesn't print over its neighbour.
   const x = (i: number) => `${(i / (all.length - 1)) * 100}%`;
   const strip = h('div', { class: 'strip' });
   for (const e of all) strip.append(h('button', { type: 'button', class: `tk s${e.size}`, style: `left:${x(e.n - 1)}`, 'data-n': String(e.n), title: `#${e.n} · ${e.title}`, 'aria-label': `Go to change ${e.n}, ${e.title}` }));
-  for (const [vi, v] of VERSIONS.entries()) {
-    const idx = all.filter((e) => e.version === v.id).map((e) => e.n - 1), a = Math.min(...idx), b = Math.max(...idx);
-    strip.append(h('div', { class: `vb${v.id === current ? ' cur' : ''}`, style: `left:${x(a)};right:calc(100% - ${x(b)})` }, h('span', null, v.id)));
-    if (vi) strip.append(h('div', { class: 'cut', style: `left:${x(a - 0.5)}` }));
+  for (const [si, s] of SERIES.entries()) {
+    const idx = all.filter((e) => series(e.version) === s).map((e) => e.n - 1), a = Math.min(...idx), b = Math.max(...idx);
+    strip.append(h('div', { class: `vb${s === series(current) ? ' cur' : ''}${si % 2 ? ' lo' : ''}`, style: `left:${x(a)};right:calc(100% - ${x(b)})` }, h('span', null, s)));
+    if (si) strip.append(h('div', { class: 'cut', style: `left:${x(a - 0.5)}` }));
   }
 
   // ---- the list
@@ -69,12 +74,11 @@ export function createLog(): void {
     h('div', { class: 'eh' }, h('span', { class: 'kind' }, KIND[e.kind]), h('span', { class: 'at' }, stamp(e.at))),
     h('b', null, e.title), h('p', null, e.text),
     h('div', { class: 'ef' }, h('span', null, `#${String(e.n).padStart(2, '0')}`),
-      e.commit ? h('a', { href: `${REPO}/commit/${e.commit}`, target: '_blank', rel: 'noopener' }, e.commit) : h('span', null, 'this release'),
-      e.tag ? h('em', { class: 'tag' }, e.tag) : null));
+      e.commit ? h('a', { href: `${REPO}/commit/${e.commit}`, target: '_blank', rel: 'noopener' }, e.commit) : h('span', null, 'this release')));
 
   function paint() {
     const vis = all.filter(shown);
-    sum.textContent = vis.length === all.length ? `${all.length} changes · ${VERSIONS.length} versions` : `${vis.length} of ${all.length} changes`;
+    sum.textContent = vis.length === all.length ? `${all.length} changes · ${VERSIONS.length} releases` : `${vis.length} of ${all.length} changes`;
     // each kind's count, inside the version and sizes chosen
     for (const c of kChips.querySelectorAll<HTMLElement>('.chip')) {
       const k = c.dataset.v as Kind | 'all';
@@ -86,18 +90,19 @@ export function createLog(): void {
     const sections = order.flatMap((v, oi) => {
       const mine = all.filter((e) => e.version === v.id), rows = mine.filter(shown);
       if (!rows.length) return [];
-      const first = mine[0], last = mine[mine.length - 1], isCur = v.id === current, tags = mine.filter((e) => e.tag).map((e) => e.tag!);
+      const last = mine[mine.length - 1], isCur = v.id === current;
       const prev = order[oi + 1];
-      return [h('section', { class: `ver${isCur ? ' cur' : ''}`, 'aria-label': `Version ${v.id}` },
-        // pinned while you read it, so you always know which version you are in
+      return [h('section', { class: `ver${isCur ? ' cur' : ''}`, 'aria-label': `Release ${v.id}` },
+        // pinned while you read it, so you always know which release you are in
         h('header', { class: 'vh' },
           h('span', { class: 'vn' }, v.id),
           h('span', { class: 'vname' }, v.name),
-          h('span', { class: 'vr' }, isCur ? 'now' : 'closed')),
+          h('span', { class: 'vr' }, isCur ? 'latest' : day(last.at))),
         h('dl', { class: 'vmeta' },
-          h('dt', null, 'From'), h('dd', null, stamp(first.at)), h('dt', null, 'To'), h('dd', null, isCur ? 'open' : stamp(last.at)),
-          h('dt', null, 'Changes'), h('dd', null, String(mine.length)), h('dt', null, 'Tags'), h('dd', null, tags.length ? tags.join(' · ') : '—')),
-        h('figure', null, h('img', { src: v.fig, alt: `The bench in version ${v.id}`, loading: 'lazy', width: '880', height: '495' }), h('figcaption', null, v.caption)),
+          h('dt', null, 'Released'), h('dd', null, day(last.at)),
+          h('dt', null, 'Changes'), h('dd', null, String(mine.length)),
+          h('dt', null, 'Tag'), h('dd', null, h('a', { href: `${REPO}/tree/${v.id}`, target: '_blank', rel: 'noopener' }, v.id))),
+        v.fig ? h('figure', null, h('img', { src: v.fig, alt: `The bench in ${v.id}`, loading: 'lazy', width: '880', height: '495' }), v.caption ? h('figcaption', null, v.caption) : null) : null,
         h('ol', { class: 'rows' }, ...[...rows].reverse().map(item)),
         h('div', { class: 'vstart' }, h('span', null, `${v.id} begins`), h('span', null, prev ? `after ${prev.id}` : 'the first change')))];
     });
