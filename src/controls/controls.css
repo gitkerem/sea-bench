@@ -77,6 +77,13 @@ kbd{font:400 10px/1 var(--mono);padding:2px 5px;border-radius:4px;border:1px sol
 .ring .big{font:400 30px/1 var(--mono);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
 .ring .unit{font:400 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .ring .sub{margin-top:4px;font:400 10.5px/1 var(--mono);letter-spacing:.04em;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.ring.sm{width:64px;height:64px}
+/* a ring set in a row of dials: the same column, label and value under it */
+.ringcol{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ringcol .lab{font-size:9.5px;text-align:center;white-space:nowrap}
+.ringcol .val{font-size:11px;color:var(--ink-2)}
+/* the rim (or the bar's edge) turns red with the keys, so no outline, which a folder would clip */
+.ring:focus-visible,.vbar:focus-visible{outline:0}
 
 /* the wind row: a compass ring the size of a speed disc, the figures logged beside it, its strength on an upright
    bar; the ring's middle shows the wind, its sub line the bearing it comes from */

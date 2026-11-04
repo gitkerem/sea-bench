@@ -57,18 +57,19 @@ export class BenchUI {
     this.paints.push(dial(id, { ...o, ...this.num(o.key, o.onInput) }));
   }
 
-  /** The day circle: drag the sun round it, noon at the top, in quarter hours. */
+  /** The day on a small ring beside the two light knobs: drag the sun round it, noon at the top, in quarter hours.
+   *  Turning it puts the sun back on the clock; the folder's note says where the sun is, or that it's by hand. */
   dayCircle(onChange: () => void): void {
     const S = this.state, clock = (tod: number) => `${String(Math.floor(tod)).padStart(2, '0')}:${String(Math.round((tod % 1) * 60)).padStart(2, '0')}`;
     const paintRing = ring('tod', {
-      C: 74, R: 73 - 3 - 7, step: 3.75, fine: 3.75, text: () => clock(S.tod),
+      C: 32, R: 28 - 2.5 - 4, step: 3.75, fine: 3.75, text: () => clock(S.tod),
       get: () => (((S.tod / 24) * 360 + 180) % 360),
       set: (deg) => { S.tod = (Math.round((deg / 360 * 24 + 12) * 4) / 4) % 24; S.sunManual = false; this.preset = ''; onChange(); },
     });
     const paint = () => {
       paintRing();
       $('todT').textContent = clock(S.tod);
-      $('todD').textContent = S.sunManual ? 'manual' : `sun ${S.sunEl}°${sunFromTod(S.tod).below ? ' low' : ''}`;
+      $('todD').textContent = S.sunManual ? 'by hand' : `sun ${S.sunEl}°${sunFromTod(S.tod).below ? ' low' : ''}`;
     };
     this.paints.push(paint); paint();
   }
@@ -80,36 +81,20 @@ export class BenchUI {
     const from = (d: number) => `${pad3(d)}° ${compass(d)}`;
     const paintRing = ring('windFrom', { C: 74, R: 73 - 3 - 7, text: from, ...this.num('windFrom', onInput) });
     const paintBar = vbar('windBar', { min: 2, max: 40, step: 0.5, big: 2.5, text: (v) => v.toFixed(1) + ' kn', ...this.num('windKn', onInput) });
-    const paint = () => { paintRing(); paintBar(); $('windKn').textContent = S.windKn.toFixed(1); $('windFromVal').textContent = from(S.windFrom); };
+    // while the bar is held the middle shows the wind being set; otherwise main.ts shows the wind blowing now
+    const paint = () => { paintRing(); paintBar(); if ($('windBar').classList.contains('on')) $('windKn').textContent = S.windKn.toFixed(1); $('windFromVal').textContent = from(S.windFrom); };
     // the middle follows the hand as it moves, not only on the next readout
     for (const id of ['windFrom', 'windBar']) $(id).addEventListener('pointermove', paint);
     $('windFrom').addEventListener('keydown', paint); $('windBar').addEventListener('keydown', paint);
     this.paints.push(paint); paint();
   }
 
-  private paintSun: () => void = () => {};
   private paintPresets: () => void = () => {};
-  paintSunMode(): void { this.paintSun(); }
   paintPreset(): void { this.paintPresets(); }
 
-  /** The fine-tune plate opens over the panel, anchored to its button; a click anywhere else closes it. */
-  setDialog(open: boolean): void {
-    const d = $('lightDlg'), b = $('bLight');
-    if (open) {
-      const r = b.getBoundingClientRect();
-      d.style.right = Math.max(12, window.innerWidth - r.right) + 'px';
-      d.style.top = Math.max(12, Math.min(r.top - 8, window.innerHeight - d.offsetHeight - 12)) + 'px';
-    }
-    d.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
-  }
-
-  wireChrome(opts: { onPreset: (name: string) => void; onReset: () => void; onReseed: () => void; onPause: (p: boolean) => void; shareUrl: () => string; onSunMode: () => void }): void {
+  wireChrome(opts: { onPreset: (name: string) => void; onReset: () => void; onReseed: () => void; onPause: (p: boolean) => void; shareUrl: () => string }): void {
     folders();
     this.paintPresets = dots('segPreset', { get: () => this.preset, set: (v) => { this.preset = v; Object.assign(this.state, PRESETS[v]); opts.onPreset(v); } });
-    this.paintSun = dots('segSun', { get: () => (this.state.sunManual ? 'manual' : 'tod'), set: (v) => { this.state.sunManual = v === 'manual'; opts.onSunMode(); } });
-    document.addEventListener('pointerdown', (e) => { if ($('lightDlg').classList.contains('open') && !(e.target as HTMLElement).closest('#lightDlg, #bLight')) this.setDialog(false); });
-    $('bLight').addEventListener('click', () => this.setDialog(!$('lightDlg').classList.contains('open')));
-    $('bLightClose').addEventListener('click', () => this.setDialog(false));
     const setPaused = (v: boolean) => { this.paused = v; $('bPause').setAttribute('aria-label', v ? 'run' : 'pause'); $('bPause').querySelector('span')!.textContent = v ? 'Run' : 'Pause'; $('bPause').classList.toggle('ink', v); $('vTime').classList.toggle('paused', v); opts.onPause(v); };
     $('bPause').addEventListener('click', () => setPaused(!this.paused));
     $('bReseed').addEventListener('click', opts.onReseed);
@@ -122,7 +107,6 @@ export class BenchUI {
       if ((e.target as HTMLElement).tagName === 'INPUT') return;
       if (e.code === 'Space') { setPaused(!this.paused); e.preventDefault(); }
       if (e.key === 'r' || e.key === 'R') opts.onReseed();
-      if (e.key === 'Escape') this.setDialog(false);
     });
   }
 

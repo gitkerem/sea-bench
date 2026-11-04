@@ -34,6 +34,6 @@ Dark mode is `data-theme="dark"` on `<html>`; the switch top-right remembers the
 - **Knob**: black disc, white hand over a dotted 270° scale; drag around it or up/down over it; arrow keys when focused.
 - **Day circle**: 1 px ring, the red sun travelling inside it 4 px clear of the stroke, time in the centre at 20 px with
   the sun height in small caps under it. Noon at the top.
-- **Fine-tune plate**: a second plate that opens over the panel, anchored to its button, rising in over 240 ms; closes on
-  outside click or Esc.
+- **Light**: three equal circles in a row, the day's ring (the red sun on its rim, noon at the top) and the Glint and
+  Clarity knobs, each with its label and value under it; the sun's height and bearing as sliders beneath.
 - **Keys** (bottom-left): a ruler key and the shortcut line, mono, muted.

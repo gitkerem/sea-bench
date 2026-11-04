@@ -37,6 +37,10 @@ const BFT_TOP = [1, 3.5, 6.5, 10.5, 16.5, 21.5, 27.5, 33.5, 40.5, 47.5];
 const BFT_NAME = ['calm', 'light air', 'light', 'gentle', 'moderate', 'fresh', 'strong', 'near gale', 'gale', 'strong gale', 'storm'];
 export const beaufort = (kn: number) => { const i = BFT_TOP.findIndex((top) => kn < top), n = i < 0 ? BFT_TOP.length : i; return `${n} ${BFT_NAME[n]}`; };
 
+/** The wind blowing now over the set wind, as the dinghy simulator gusts it: three slow waves summed, about ±11 %
+ *  over half a minute or so. Only the reading wanders; the sea is shaped by the set wind. */
+export const gust = (t: number) => 1 + 0.12 * (Math.sin(t * 0.31) * 0.5 + Math.sin(t * 0.83 + 1) * 0.3 + Math.sin(t * 2.1 + 0.7) * 0.12);
+
 export const compass = (d: number) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(((d % 360) + 360) % 360 / 22.5) % 16];
 
 /** Time of day → sun: up in the east at 06:00, highest at noon, down in the west at 18:00; low and warm through the night. */

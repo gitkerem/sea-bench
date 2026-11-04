@@ -20,7 +20,7 @@ Built across one long session (1 Nov 2026) as single-file claude.ai artifacts, t
   192-sided cylinder, so the radius can change at runtime (lessons mode in the sim grows it to 15 m).
 - The seabed is procedural (dunes, ripples aligned to the default wave direction, boulders); strata show in the cut.
 - Light: time of day drives sun height and direction through a toy solar path (east 06:00, noon highest, west
-  18:00, low and warm through the night); the fine-tune plate can take it off the clock.
+  18:00, low and warm through the night); the sun's sliders take it off the clock, and turning the clock puts it back.
 - The bench keeps all its state in one object (`BenchState`) and can put it in the URL (Copy settings).
 
 ## How it was verified

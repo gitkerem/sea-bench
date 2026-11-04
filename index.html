@@ -26,12 +26,14 @@
 <aside class="panel" id="panel" aria-label="Sea controls">
   <div class="body">
   <section class="folder" id="fLight">
-    <button class="fh" type="button" aria-expanded="true">Light<svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></button>
+    <button class="fh" type="button" aria-expanded="true">Light <span class="c" id="todD">sun 49°</span><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></button>
     <div class="fb"><div>
-      <div class="light">
-        <div class="ring" id="tod" role="slider" tabindex="0" aria-label="Time of day"><svg viewBox="0 0 148 148" aria-hidden="true"><circle class="rim" cx="74" cy="74" r="73.5"/><text x="74" y="20" text-anchor="middle">12</text><text x="131" y="77" text-anchor="middle">18</text><text x="74" y="134" text-anchor="middle">00</text><text x="17" y="77" text-anchor="middle">06</text><circle class="dot" cx="74" cy="11" r="7"/></svg><div class="mid"><div class="big" id="todT">14:30</div><div class="sub" id="todD">sun 49°</div></div></div>
-        <div class="side"><button class="btn ico" type="button" id="bLight" title="Fine-tune the light" aria-label="Fine-tune the light" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h8M16 7h4M4 12h3M11 12h9M4 17h10M18 17h2"/><circle cx="14" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="16" cy="17" r="2"/></svg></button></div>
+      <div class="trio">
+        <div class="ringcol"><div class="ring sm" id="tod" role="slider" tabindex="0" aria-label="Time of day"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="rim" cx="32" cy="32" r="28"/><circle class="dot" cx="32" cy="10.5" r="4"/></svg></div><span class="lab">Time</span><span class="val" id="todT">14:30</span></div>
+        <div id="dGlint"></div><div id="dClarity"></div>
       </div>
+      <div id="slSunEl"></div><div id="slSunAz"></div>
+      <p class="hint">Moving the sun by hand takes it off the clock; turn the clock to put it back.</p>
     </div></div>
   </section>
   <section class="folder" id="fSea">
@@ -86,13 +88,6 @@
   </div>
 </aside>
 
-<div class="dlg" id="lightDlg" role="dialog" aria-label="Light, fine tune">
-  <div class="dh"><span>Light · fine tune</span><button class="btn ico" type="button" id="bLightClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-  <nav class="dots" id="segSun" aria-label="Sun"><button type="button" data-v="tod" aria-pressed="true">Time of day</button><button type="button" data-v="manual">Manual</button></nav>
-  <div id="slSunEl"></div><div id="slSunAz"></div>
-  <div class="dials"><div id="dGlint"></div><div id="dClarity"></div></div>
-  <p class="hint">Moving the sun by hand takes it off the clock; pick Time of day to put it back.</p>
-</div>
 
 <div id="nogpu"><div><h2>This needs WebGPU</h2><p>The sea is simulated with compute shaders. Open this page in Chrome or Edge, or Safari 26 on macOS and iOS.</p></div></div>
 <script type="module" src="/src/bench/main.ts"></script>

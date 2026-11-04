@@ -4,7 +4,7 @@ import './style.css';
 import * as THREE from 'three/webgpu';
 import { SeaSim, SeaColumn, seaStats, swellAmpForHs, travelFromCompass, G, type SeaParams } from '../sea';
 import { BenchUI, $ } from './ui';
-import { loadState, DEFAULTS, shareUrl, seaWord, compass, beaufort, sunFromTod, type BenchState } from './state';
+import { loadState, DEFAULTS, shareUrl, seaWord, compass, beaufort, gust, sunFromTod, type BenchState } from './state';
 import { BenchCamera } from './camera';
 import { startAnalytics } from './analytics';
 import { typeTitle } from './title';
@@ -36,7 +36,7 @@ async function main() {
 
   // ---------- state → sea
   const { state: S, fromUrl } = loadState();
-  const ui = new BenchUI(S, { onSea: () => rebuild(), onLook: () => applyLook(), onReplace: () => { applyLook(); ui.paintSunMode(); ui.repaintAll(); rebuild(); } });
+  const ui = new BenchUI(S, { onSea: () => rebuild(), onLook: () => applyLook(), onReplace: () => { applyLook(); ui.repaintAll(); rebuild(); } });
   if (fromUrl) ui.preset = '';
 
   function seaParams(): SeaParams {
@@ -93,23 +93,22 @@ async function main() {
   ui.slider('slTime',     { label: 'Time',         min: 0.1,  max: 2,   step: 0.05, key: 'timeK',    fmt: (v) => v.toFixed(2) + ' ×', onInput: () => {} });
   ui.dial('dGlint',   { label: 'Glint',   min: 0,   max: 3,   step: 0.05, key: 'glint',   fmt: (v) => v.toFixed(2) + ' ×', onInput: lookIn });
   ui.dial('dClarity', { label: 'Clarity', min: 0.4, max: 2.5, step: 0.05, key: 'clarity', fmt: (v) => (v < 0.7 ? 'murky' : v < 1.3 ? 'coastal' : v < 2 ? 'clear' : 'tropical'), onInput: lookIn });
-  const manual = () => { S.sunManual = true; ui.paintSunMode(); applyLook(); ui.repaintAll(); };
+  const manual = () => { S.sunManual = true; applyLook(); ui.repaintAll(); };
   ui.slider('slSunEl', { label: 'Sun height', min: 8,    max: 80,  step: 1, key: 'sunEl', fmt: (v) => v + '°', onInput: manual });
   ui.slider('slSunAz', { label: 'Sun around', min: -180, max: 180, step: 5, key: 'sunAz', fmt: (v) => (v > 0 ? '+' : '') + v + '°', onInput: manual });
-  ui.dayCircle(() => { applyLook(); ui.paintSunMode(); ui.repaintAll(); });
+  ui.dayCircle(() => { applyLook(); ui.repaintAll(); });
   let paused = false;
   ui.wireChrome({
-    onPreset: () => { applyLook(); ui.paintSunMode(); ui.repaintAll(); rebuild(); },
-    onReset: () => { Object.assign(S, DEFAULTS); applyLook(); ui.paintSunMode(); ui.repaintAll(); rebuild(); },
+    onPreset: () => { applyLook(); ui.repaintAll(); rebuild(); },
+    onReset: () => { Object.assign(S, DEFAULTS); applyLook(); ui.repaintAll(); rebuild(); },
     onReseed: () => { sea.reseed(); paintReadout(); },
     onPause: (p) => { paused = p; },
-    onSunMode: () => { applyLook(); ui.repaintAll(); },
     shareUrl: () => shareUrl(S),
   });
   window.addEventListener('resize', () => { renderer.setSize(window.innerWidth, window.innerHeight); cam.resize(); });
 
   // ---------- go
-  ui.paintPreset(); applyLook(); ui.paintSunMode(); ui.repaintAll(); rebuild();
+  ui.paintPreset(); applyLook(); ui.repaintAll(); rebuild();
 
   // headless verification hook: ?check=1 compiles every material and runs the sea without presenting a frame
   if (q.get('check')) {
@@ -121,13 +120,15 @@ async function main() {
     return;
   }
 
-  let last = performance.now(), fpsAvg = 60, acc = 0;
+  let last = performance.now(), fpsAvg = 60, acc = 0, accW = 1;
   renderer.setAnimationLoop(() => {
     const now = performance.now(), raw = Math.min(0.05, (now - last) / 1000); last = now;
     fpsAvg += (1 / Math.max(raw, 1e-3) - fpsAvg) * 0.05;
     if (!paused) sea.step(raw * S.timeK);
     renderer.render(scene, cam.camera);
-    acc += raw;
+    acc += raw; accW += raw;
+    // the wind in the ring wanders with the gusts about eight times a second, unless a hand is on the bar
+    if (accW > 0.12) { accW = 0; if (!$('windBar').classList.contains('on')) $('windKn').textContent = (S.windKn * gust(sea.time)).toFixed(1); }
     if (acc > 0.5) {
       acc = 0;
       const t = Math.floor(sea.time), mm = String(Math.floor(t / 60)).padStart(2, '0'), ss = String(t % 60).padStart(2, '0');

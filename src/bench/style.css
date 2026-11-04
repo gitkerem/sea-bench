@@ -59,18 +59,9 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .btn.ico.ok .ic,.btn.ico.no .ic{display:none}
 .btn.ico.ok .ok{display:block}
 .btn.ico.no .no{display:block}
-/* light: the day on a ring, the red sun travelling round it with noon at the top; a second plate holds the fine tuning */
-.light{display:grid;grid-template-columns:1fr 36px;gap:8px;align-items:center;padding:4px 0 8px}
-.light .ring{justify-self:center}
-.light .side{display:flex;flex-direction:column;align-items:center}
-.dlg{position:fixed;z-index:5;width:280px;padding:2px 14px 16px;border:1px solid var(--line);border-radius:var(--r-plate);background:var(--plate);display:flex;flex-direction:column;gap:8px;
-  box-shadow:0 12px 32px rgba(20,22,20,.10);visibility:hidden;opacity:0;transform:translateY(6px) scale(.985);transform-origin:top right;
-  transition:opacity 160ms ease,transform 240ms cubic-bezier(.2,.8,.2,1),visibility 0s 240ms}
-.dlg.open{visibility:visible;opacity:1;transform:none;transition-delay:0s}
-.dlg .dh{display:flex;align-items:center;justify-content:space-between;height:44px;font:400 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.dials{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:8px 0 4px}
+/* light: three equal circles, the day's ring and the two knobs, the sun's two sliders under them */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:start;padding:6px 0 4px}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.ring:focus-visible{outline:0}
 #nogpu{position:fixed;inset:0;z-index:10;display:none;place-items:center;background:var(--scene);color:var(--ink);padding:24px;text-align:center}
 #nogpu.show{display:grid}
 #nogpu p{max-width:36ch;font-size:15px;line-height:1.5;color:var(--ink-2)}

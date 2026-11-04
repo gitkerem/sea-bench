@@ -29,7 +29,7 @@ The package exports `src/sea` as TypeScript source, for a Vite + TypeScript proj
 three as your own dependency (it is a peer, so there is only ever one copy):
 
 ```
-npm install three@0.186.0 github:gitkerem/sea-bench#v0.4.0
+npm install three@0.186.0 github:gitkerem/sea-bench#v0.5.0
 ```
 
 ```ts
