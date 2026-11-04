@@ -72,7 +72,8 @@ reference/            the single-file artifact this was extracted from, as publi
 ## Versions
 
 The title and the page name (`<title>`) carry a prototype name, **001.B** now: the number is the prototype (001, the
-water column; a rethink is 002.A), the letter moves on with each release a person would notice. Bump it in
+water column; a rethink is 002.A), the letter moves on only when Kerem calls a release a new one; until then
+changes ship as patch tags under the same name. Bump it in
 `index.html` (title, the meta's Prototype and Date, `<title>`) and add a row to the README's Versions table. Tags stay
 semver (`vX.Y.Z`, the package version matching); a fix that nobody sees is a patch tag under the same letter.
 

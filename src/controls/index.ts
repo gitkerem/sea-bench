@@ -1,6 +1,7 @@
 /**
  * The plate's controls, shared by the sea bench and the dinghy simulator: folders, sliders on a tick scale with a
- * round knob, dots, switches, buttons, a knob dial, a ring you drag a dot round and an upright bar. Each control owns no state: it
+ * round knob, dots, switches, buttons, a knob dial, a ring you drag a dot round and an upright bar; dials and rings
+ * also turn with a scroll over them. Each control owns no state: it
  * reads through `get`, writes through `set`, and returns a `paint` to call when the value changed elsewhere. Labels
  * come in as plain text, so an app can run them through its own translations. Hand-written DOM, styled by
  * controls.css from the tokens in tokens.css.
@@ -74,6 +75,8 @@ export function dial(host: HTMLElement | string, o: DialOpts): Paint {
   });
   const end = () => { drag = null; d.classList.remove('on'); };
   svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
+  // scroll over it: a full turn in about 300 px, never finer than 10 px a step
+  wheelOn(svg, Math.max(10, 300 * o.step / (o.max - o.min)), (n) => setFrom((clamp(o.get() + n * o.step, o.min, o.max) - o.min) / (o.max - o.min)));
   d.addEventListener('click', () => inp.focus({ preventScroll: true }));
   inp.addEventListener('input', () => { o.set(+inp.value); paint(); });
   paint();
@@ -98,6 +101,38 @@ export function keysOn(target: Element, by: (dir: number, shift: boolean) => voi
     if (!dir) return;
     by(dir, k.shiftKey); k.preventDefault(); k.stopPropagation();
   });
+}
+
+/** The control a scroll gesture began on, if any: a scroll that starts over the panel and passes over a dial keeps
+ *  scrolling the panel, and only one that starts on a dial turns it. A pause of a quarter second starts a new one. */
+const wheelers = new Set<Element>();
+let gesture: { t: number; on: Element | null } = { t: -Infinity, on: null };
+function watchWheel(): void {
+  addEventListener('wheel', (e) => {
+    const now = performance.now();
+    if (now - gesture.t > 250) { let n = e.target as Element | null; while (n && !wheelers.has(n)) n = n.parentElement; gesture.on = n; }
+    gesture.t = now;
+  }, { capture: true, passive: true });
+}
+
+/** Scroll over a control to turn it: up (a wheel rolled up, or two fingers down a trackpad with natural scrolling)
+ *  is more, down is less. `by` gets whole steps, one per `pxPerStep` scrolled; a wheel's click is one step, however
+ *  far the mouse says it went. */
+export function wheelOn(target: Element, pxPerStep: number, by: (steps: number) => void): void {
+  if (!wheelers.size) watchWheel();
+  wheelers.add(target);
+  let acc = 0, last = 0;
+  target.addEventListener('wheel', (e) => {
+    if (gesture.on !== target) return;
+    const w = e as WheelEvent, now = performance.now();
+    w.preventDefault();
+    if (now - last > 250) acc = 0;
+    last = now;
+    const px = -w.deltaY * (w.deltaMode === 1 ? 16 : w.deltaMode === 2 ? 400 : 1);
+    acc += clamp(px, -pxPerStep, pxPerStep);
+    const n = Math.trunc(acc / pxPerStep);
+    if (n) { acc -= n * pxPerStep; by(n); }
+  }, { passive: false });
 }
 
 export interface RingOpts {
@@ -125,6 +160,7 @@ export function ring(host: HTMLElement | string, o: RingOpts): Paint {
   const to = (d: number) => { d = wrap(+(Math.round(d / fine) * fine).toFixed(4)); if (d !== o.get()) { o.set(d); paint(); } };
   dragOn(r, (e) => { const b = r.getBoundingClientRect(); to(Math.round(Math.atan2(e.clientX - b.left - b.width / 2, b.top + b.height / 2 - e.clientY) * R2D / step) * step); });
   keysOn(r, (dir, shift) => to(o.get() + dir * (shift ? fine : step)));
+  wheelOn(r, 12, (n) => to(o.get() + n * step));   // scroll up turns it clockwise, a step each 12 px
   r.setAttribute('aria-valuemin', '0'); r.setAttribute('aria-valuemax', '359');
   paint();
   return paint;
