@@ -71,7 +71,7 @@ column.setBedOffset(groundX, groundZ); // and over the ground (they differ when 
 ## Versions
 
 Releases are semver git tags, `vX.Y.Z`, and the package version matches. The title and the page name show the current
-one. Every change is in the bench's change log: hover the version in the title.
+one, with the minor in two digits (v0.5.2 reads v0.05.2). Every change is in the bench's change log: hover the version in the title.
 
 | Release | What it brought |
 |---|---|

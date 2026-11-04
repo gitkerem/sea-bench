@@ -38,6 +38,9 @@ export const REPO = 'https://github.com/gitkerem/sea-bench';
 
 /** the minor series a release belongs to, `v0.5.2` → `v0.5`: what the version filter and the strip group by */
 export const series = (id: string) => id.split('.').slice(0, 2).join('.');
+/** how a version reads on screen: the minor in two digits, `v0.5.2` → `v0.05.2`. Display only; tags stay semver,
+ *  since npm won't take a leading zero. */
+export const show = (id: string) => id.replace(/^v(\d+)\.(\d+)/, (_, a: string, b: string) => `v${a}.${b.padStart(2, '0')}`);
 
 export const VERSIONS: Version[] = [
   { id: 'v0.1.0', name: 'the water column' },
@@ -106,5 +109,8 @@ export const ENTRIES: Entry[] = [
     text: 'Hover the version in the title for its button: a side drawer of every change, filtered by version, kind and size.' },
   { at: '2026-11-03T18:50', version: 'v0.5.2', kind: 'improved', size: 1,
     title: 'Plain version numbers',
-    text: 'The title, the page name and this log say v0.5.2, the release tag, in place of a prototype letter.' },
+    text: 'The title, the page name and this log say v0.05.2 in place of a prototype letter; the git tag is v0.5.2.' },
+  { at: '2026-11-03T19:25', version: 'v0.5.2', kind: 'improved', size: 1,
+    title: 'Plainer icons, and a Changelog label',
+    text: 'The panel’s buttons are drawn with a line, a dot or an arrow; the change log opens from a small text button beside the version.' },
 ];

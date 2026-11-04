@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ENTRIES, VERSIONS } from '../src/bench/changelog';
+import { ENTRIES, VERSIONS, show } from '../src/bench/changelog';
 import html from '../index.html?raw';
 import pkg from '../package.json';
 
@@ -34,7 +34,9 @@ describe('change log', () => {
   it('shows the package version in the title, the page name and the log', () => {
     const last = VERSIONS[VERSIONS.length - 1].id;
     expect(last).toBe(`v${pkg.version}`);
-    expect(html).toContain(`<span class="v">${last}</span>`);
-    expect(html).toContain(`<title>Sea bench · ${last}</title>`);
+    const text = html.replace(/<\/?i[^>]*>/g, ''); // the narrow dots are <i class="pt">
+    expect(show(last)).toBe('v' + pkg.version.replace(/\.(\d+)/, (_, m: string) => '.' + m.padStart(2, '0')));
+    expect(text).toContain(`<span class="v">${show(last)}</span>`);
+    expect(text).toContain(`<title>Sea bench · ${show(last)}</title>`);
   });
 });

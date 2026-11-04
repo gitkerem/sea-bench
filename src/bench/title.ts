@@ -27,7 +27,7 @@ export function typeTitle(el: HTMLElement) {
   if (version) {
     cells.push({ el: span(), ch: ' ', appear: nameEnd, start: nameEnd });
     const t1 = nameEnd + PAUSE, t2 = t1 + THINK;
-    [...version].forEach((ch, j) => cells.push({ el: span(), ch, appear: j ? t2 + j * V_STAGGER : t1, start: t2 + j * V_STAGGER, think: j ? undefined : t1, cls: 'v' }));
+    [...version].forEach((ch, j) => cells.push({ el: span(), ch, appear: j ? t2 + j * V_STAGGER : t1, start: t2 + j * V_STAGGER, think: j ? undefined : t1, cls: ch === '.' ? 'v pt' : 'v' }));
   }
   const end = Math.max(...cells.map((c) => c.start + SETTLE));
   const cur = span();

@@ -5,7 +5,7 @@
  * then the changes newest first, release by release, each release's head pinned while you read it. Releases are
  * the git tags (v0.5.2); the filter and the strip group them by minor series (v0.5) so they stay legible.
  */
-import { ENTRIES, REPO, VERSIONS, series, type Kind } from './changelog';
+import { ENTRIES, REPO, VERSIONS, series, show, type Kind } from './changelog';
 import { dots, toggle } from '../controls';
 
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -14,6 +14,9 @@ const KIND: Record<Kind, string> = { new: 'New', improved: 'Improved', fixed: 'F
 /** `2026-11-03T17:35` → `Nov 3, 17:35`, read as written */
 const stamp = (at: string) => `${day(at)}, ${at.slice(11, 16)}`;
 const day = (at: string) => `${MON[+at.slice(5, 7) - 1]} ${+at.slice(8, 10)}`;
+
+/** a version as it reads, its dots drawn narrow: in a mono face a full-width dot opens a gap either side */
+const ver = (id: string) => { const s = document.createElement('span'); s.className = 'vtx'; s.innerHTML = show(id).replace(/\./g, '<i class="pt">.</i>'); return s; };
 
 type Attrs = Record<string, string | undefined>;
 function h(tag: string, attrs: Attrs | null = null, ...kids: (Node | string | null | undefined)[]): HTMLElement {
@@ -44,7 +47,7 @@ export function createLog(): void {
 
   // ---- filters: which version, which kind, and whether the small changes show
   const vDots = h('div', { class: 'dots', role: 'group', 'aria-label': 'Version' },
-    ...['all', ...[...SERIES].reverse()].map((v) => h('button', { type: 'button', 'data-v': v }, v === 'all' ? 'All' : v)));
+    ...['all', ...[...SERIES].reverse()].map((v) => h('button', { type: 'button', 'data-v': v }, v === 'all' ? 'All' : ver(v))));
   const kChips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Kind' },
     ...(['all', ...KINDS] as const).map((k) => h('button', { type: 'button', class: 'chip', 'data-v': k },
       k !== 'all' ? h('span', { class: `node k-${k}`, 'aria-hidden': 'true' }) : null, k === 'all' ? 'All' : KIND[k], h('em'))));
@@ -62,7 +65,7 @@ export function createLog(): void {
   for (const e of all) strip.append(h('button', { type: 'button', class: `tk s${e.size}`, style: `left:${x(e.n - 1)}`, 'data-n': String(e.n), title: `#${e.n} · ${e.title}`, 'aria-label': `Go to change ${e.n}, ${e.title}` }));
   for (const [si, s] of SERIES.entries()) {
     const idx = all.filter((e) => series(e.version) === s).map((e) => e.n - 1), a = Math.min(...idx), b = Math.max(...idx);
-    strip.append(h('div', { class: `vb${s === series(current) ? ' cur' : ''}${si % 2 ? ' lo' : ''}`, style: `left:${x(a)};right:calc(100% - ${x(b)})` }, h('span', null, s)));
+    strip.append(h('div', { class: `vb${s === series(current) ? ' cur' : ''}${si % 2 ? ' lo' : ''}`, style: `left:${x(a)};right:calc(100% - ${x(b)})` }, h('span', null, ver(s))));
     if (si) strip.append(h('div', { class: 'cut', style: `left:${x(a - 0.5)}` }));
   }
 
@@ -92,19 +95,19 @@ export function createLog(): void {
       if (!rows.length) return [];
       const last = mine[mine.length - 1], isCur = v.id === current;
       const prev = order[oi + 1];
-      return [h('section', { class: `ver${isCur ? ' cur' : ''}`, 'aria-label': `Release ${v.id}` },
+      return [h('section', { class: `ver${isCur ? ' cur' : ''}`, 'aria-label': `Release ${show(v.id)}` },
         // pinned while you read it, so you always know which release you are in
         h('header', { class: 'vh' },
-          h('span', { class: 'vn' }, v.id),
+          h('span', { class: 'vn' }, ver(v.id)),
           h('span', { class: 'vname' }, v.name),
           h('span', { class: 'vr' }, isCur ? 'latest' : day(last.at))),
         h('dl', { class: 'vmeta' },
           h('dt', null, 'Released'), h('dd', null, day(last.at)),
           h('dt', null, 'Changes'), h('dd', null, String(mine.length)),
-          h('dt', null, 'Tag'), h('dd', null, h('a', { href: `${REPO}/tree/${v.id}`, target: '_blank', rel: 'noopener' }, v.id))),
-        v.fig ? h('figure', null, h('img', { src: v.fig, alt: `The bench in ${v.id}`, loading: 'lazy', width: '880', height: '495' }), v.caption ? h('figcaption', null, v.caption) : null) : null,
+          h('dt', null, 'Tag'), h('dd', null, h('a', { href: `${REPO}/tree/${v.id}`, target: '_blank', rel: 'noopener' }, ver(v.id)))),
+        v.fig ? h('figure', null, h('img', { src: v.fig, alt: `The bench in ${show(v.id)}`, loading: 'lazy', width: '880', height: '495' }), v.caption ? h('figcaption', null, v.caption) : null) : null,
         h('ol', { class: 'rows' }, ...[...rows].reverse().map(item)),
-        h('div', { class: 'vstart' }, h('span', null, `${v.id} begins`), h('span', null, prev ? `after ${prev.id}` : 'the first change')))];
+        h('div', { class: 'vstart' }, h('span', null, ver(v.id), ' begins'), h('span', null, ...(prev ? ['after ', ver(prev.id)] : ['the first change']))))];
     });
     list.replaceChildren(...(sections.length ? sections : [empty]));
   }

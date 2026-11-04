@@ -69,11 +69,10 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 /* ===== change log: the button by the version, a side drawer, the bench easing back behind it (log.ts) ===== */
 .tline{display:flex;align-items:center;gap:12px;width:max-content;margin:0 0 14px;pointer-events:auto}
 /* waits out of sight beside the version; hovering the title slides it in from the left */
-.logbtn{flex:none;display:grid;place-items:center;width:26px;height:26px;margin:-6px 0;padding:0;border:1px solid var(--line-2);border-radius:50%;background:none;color:var(--ink);cursor:pointer;
-  opacity:0;transform:translateX(-10px);transition:opacity 220ms var(--ease),transform 280ms var(--ease),background 160ms}
-.logbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round}
-.logbtn svg circle{fill:currentColor;stroke:none}
-.logbtn:hover{background:var(--well)}
+.logbtn{flex:none;margin:-6px 0;padding:6px 0;border:0;background:none;color:var(--ink-2);cursor:pointer;
+  font:400 9.5px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;
+  opacity:0;transform:translateX(-10px);transition:opacity 220ms var(--ease),transform 280ms var(--ease),color 160ms}
+.logbtn:hover,.logbtn[aria-expanded="true"]{color:var(--ink)}
 .tline:hover .logbtn,.logbtn:focus-visible,.logbtn[aria-expanded="true"]{opacity:1;transform:none}
 @media (hover:none){.logbtn{opacity:1;transform:none}}
 
@@ -102,10 +101,14 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .log-f{display:flex;flex-direction:column;gap:6px;padding:10px 20px 6px}
 .frow{display:flex;flex-direction:column;gap:2px}
 .frow>.lab{color:var(--ink-2);font-size:9.5px;padding-top:6px}
-.log-f .dots{flex-wrap:wrap;height:auto}
+.log-f .dots{flex-wrap:wrap;height:auto;column-gap:0}
 .log-f .dots button{flex:none;gap:6px;height:30px;padding:0 6px 0 0}
 /* a version reads v0.5.2, lower-case v, even where the type around it is set in capitals */
-.log-f .dots button[data-v^="v"],.vmeta a,.hdr .title .v,.meta .ver{text-transform:none}
+.vtx,.hdr .title .v,.meta .ver{text-transform:none}
+/* Space Mono gives a dot a full cell, which opens v0.05.2 into v 0 . 05 . 2; pull the dots in, and keep the
+   title's wide tracking off the number */
+.pt{font-style:normal;margin:0 -.2em}
+.hdr .title .v{letter-spacing:.04em}
 .chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0 4px}
 .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid var(--line-2);border-radius:var(--r-pill);background:none;color:var(--ink);cursor:pointer;
   font:400 10px/1 var(--hud);letter-spacing:.08em;text-transform:uppercase;transition:background 160ms,color 160ms,border-color 160ms}
@@ -133,9 +136,9 @@ body.logopen .log{transform:none;visibility:visible;transition:transform 520ms v
 .strip .tk.off{opacity:.2}
 .strip .tk:hover::before,.strip .tk:focus-visible::before{background:var(--red);width:2px}
 .strip .vb{position:absolute;top:40px;height:5px;border:1px solid var(--line-2);border-top:0;min-width:1px}
-.strip .vb span{position:absolute;top:8px;left:0;font:400 9px/1 var(--hud);letter-spacing:.08em;color:var(--ink-2);white-space:nowrap}
-.strip .vb.cur{border-color:var(--red)}.strip .vb.cur span{color:var(--red)}
-.strip .vb.lo span{top:19px}
+.strip .vb>span{position:absolute;top:8px;left:0;font:400 9px/1 var(--hud);letter-spacing:.08em;color:var(--ink-2);white-space:nowrap}
+.strip .vb.cur{border-color:var(--red)}.strip .vb.cur>span{color:var(--red)}
+.strip .vb.lo>span{top:19px}
 .strip .cut{position:absolute;top:0;height:46px;border-left:1px dashed var(--red)}
 
 /* the list: versions newest first, the head of the one you are in pinned to the top */

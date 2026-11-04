@@ -66,13 +66,17 @@ reference/            the single-file artifact this was extracted from, as publi
   dinghy's row: a compass ring for where it comes from, an upright bar for how hard, the figures between. Change a control
   there and it changes in both apps; anything only the bench shows stays in `src/bench/style.css`. Controls own no
   state (`get`/`set`, labels as plain text). Readouts change through `ui.tick()` (a 320 ms dip), never a flap.
+- Icons are extremely minimal: bare lines, dots and arrows, 1.5 px strokes, nothing filled but a dot. Where an icon
+  would need explaining, use a small text button instead (the change log is "Changelog").
 - Comments say why, in plain English. No decoration.
 - The right-hand panel is the **instrument panel** when talking to people (in code and the older docs, "the plate").
 
 ## Versions
 
 Plain semver, nothing else: the release is its git tag `vX.Y.Z`, `package.json` matches without the v, and the title,
-the meta's Version and the page name (`<title>`) in `index.html` show it. A minor for something people notice (a new
+the meta's Version and the page name (`<title>`) in `index.html` show it, with the minor in two digits: tag v0.5.2
+reads **v0.05.2** (`show()` in `changelog.ts`; display only, since npm won't take a leading zero). In the HTML each dot is
+`<i class="pt">.</i>`, drawn narrow, because Space Mono gives a dot a full cell. A minor for something people notice (a new
 control, a new look), a patch for the smaller things; Kerem calls a minor. Releasing: bump all four, add the
 `VERSIONS` row, add the README's Versions row, then tag and push (the push deploys kerem.co, so ask first).
 `test/changelog.test.ts` fails if the package, the title and the log disagree. (Until Nov 3 the bench showed
