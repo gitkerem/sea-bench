@@ -1,17 +1,17 @@
 /**
- * The change log, a drawer that comes down from the top. Its button waits beside the version in the title and slides
- * in when you hover it. Inside: the figures, a strip with every change as one tick (taller for bigger changes) under
- * the versions it falls in, and the ledger, newest first, version by version, with a rule where one version ends and
- * the next begins. Esc, the close button or a click on the scene puts it away.
+ * The change log, a side drawer. Its button waits beside the version in the title and slides in when you hover it.
+ * Opening it eases the whole bench back (a CSS scale, nothing re-rendered) while the drawer slides in from the left.
+ * Inside, one readable column: filters for version, kind and the small changes, a timeline strip you can click,
+ * then the changes newest first, version by version, each version's head pinned while you read it.
  */
-import { ENTRIES, REPO, VERSIONS, type Entry, type Kind } from './changelog';
+import { ENTRIES, REPO, VERSIONS, type Kind } from './changelog';
+import { dots, toggle } from '../controls';
 
-const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const KINDS: Kind[] = ['new', 'improved', 'fixed', 'system'];
 const KIND: Record<Kind, string> = { new: 'New', improved: 'Improved', fixed: 'Fixed', system: 'System' };
-const SIZE = ['', 'a detail', 'a feature', 'a step'];
-/** `2026-11-03T17:35` → `NOV 03 17:35`, read as written */
-const stamp = (at: string) => `${MON[+at.slice(5, 7) - 1]} ${at.slice(8, 10)} ${at.slice(11, 16)}`;
-const day = (at: string) => `${MON[+at.slice(5, 7) - 1]} ${at.slice(8, 10)}`;
+/** `2026-11-03T17:35` → `Nov 3, 17:35`, read as written */
+const stamp = (at: string) => `${MON[+at.slice(5, 7) - 1]} ${+at.slice(8, 10)}, ${at.slice(11, 16)}`;
 
 type Attrs = Record<string, string | undefined>;
 function h(tag: string, attrs: Attrs | null = null, ...kids: (Node | string | null | undefined)[]): HTMLElement {
@@ -20,118 +20,127 @@ function h(tag: string, attrs: Attrs | null = null, ...kids: (Node | string | nu
   for (const c of kids) if (c != null) e.append(c);
   return e;
 }
-const dl = (rows: [string, Node | string][], cls = '') => h('dl', { class: cls }, ...rows.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]));
-const sizeBars = (n: number) => h('span', { class: 'size', title: SIZE[n], 'aria-label': `size ${n} of 3, ${SIZE[n]}` }, h('i'), h('i'), h('i'));
 
 export function createLog(): void {
-  const btn = document.getElementById('bLog')!, drawer = document.getElementById('log')!, scrim = document.getElementById('logScrim')!;
+  const btn = document.getElementById('bLog')!, drawer = document.getElementById('log')!, scrim = document.getElementById('logScrim')!, page = document.getElementById('page')!;
   // numbered oldest first, so a change keeps its number as the log grows
   const all = ENTRIES.map((e, i) => ({ ...e, n: i + 1 }));
+  type E = (typeof all)[number];
   const current = VERSIONS[VERSIONS.length - 1].id;
-  const count = (list: Entry[], k: Kind) => list.filter((e) => e.kind === k).length;
-  const tags = all.filter((e) => e.tag);
+  const f = { version: 'all', kind: 'all' as Kind | 'all', small: true };
+  const inVersion = (e: E) => f.version === 'all' || e.version === f.version;
+  const shown = (e: E) => inVersion(e) && (f.kind === 'all' || e.kind === f.kind) && (f.small || e.size > 1);
+  const reset = () => { f.version = 'all'; f.kind = 'all'; f.small = true; paintV(); paintS(); paint(); };
 
-  // ---- the head: what the log holds, the legend, the close button
+  // ---- head
   const close = h('button', { type: 'button', class: 'btn ico', 'aria-label': 'Close the change log' });
   close.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
-  const legend = (k: Kind) => h('span', { class: 'lg' }, h('span', { class: `node k-${k} s2`, 'aria-hidden': 'true' }), KIND[k], h('em', null, String(count(all, k))));
-  const head = h('header', { class: 'log-h' },
-    h('div', { class: 'log-t' }, h('h2', { id: 'logTitle' }, 'Change log'), h('p', null, 'Sea bench · every change, the smallest to the biggest')),
-    h('div', { class: 'meta' },
-      dl([['Entries', String(all.length)], ['Versions', VERSIONS.map((v) => v.id).join(' · ')], ['Tags', String(tags.length)], ['First', stamp(all[0].at)], ['Latest', stamp(all[all.length - 1].at)]]),
-      dl([['Kind', h('span', { class: 'lgs' }, legend('new'), legend('improved'))], ['', h('span', { class: 'lgs' }, legend('fixed'), legend('system'))],
-        ['Size', h('span', { class: 'lgs' }, ...[1, 2, 3].map((n) => h('span', { class: 'lg' }, sizeBars(n), SIZE[n])))]])),
-    close);
+  const sum = h('p', { class: 'sum' });
+  const head = h('header', { class: 'log-h' }, h('div', null, h('h2', { id: 'logTitle' }, 'Change log'), sum), close);
 
-  // ---- the strip: one tick per change, evenly spaced, under the version it falls in
-  const x = (i: number) => `calc(${(i / (all.length - 1)) * 100}%)`;
-  const strip = h('div', { class: 'strip', 'aria-hidden': 'true' });
-  const read = h('div', { class: 'read' }, 'Hover a tick');
-  let lastDay = '';
-  for (const [i, e] of all.entries()) {
-    if (day(e.at) !== lastDay) { lastDay = day(e.at); strip.append(h('span', { class: 'day', style: `left:${x(i)}` }, lastDay)); }
-    const tk = h('button', { type: 'button', class: `tk s${e.size} k-${e.kind}${e.version === current ? ' cur' : ''}`, style: `left:${x(i)}`, tabindex: '-1', 'data-n': String(e.n) });
-    strip.append(tk);
-    if (e.tag) strip.append(h('span', { class: 'tg', style: `left:${x(i)}` }, e.tag));
-  }
+  // ---- filters: which version, which kind, and whether the small changes show
+  const vDots = h('div', { class: 'dots', role: 'group', 'aria-label': 'Version' },
+    ...['all', ...[...VERSIONS].reverse().map((v) => v.id)].map((v) => h('button', { type: 'button', 'data-v': v }, v === 'all' ? 'All' : v)));
+  const kChips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Kind' },
+    ...(['all', ...KINDS] as const).map((k) => h('button', { type: 'button', class: 'chip', 'data-v': k },
+      k !== 'all' ? h('span', { class: `node k-${k}`, 'aria-hidden': 'true' }) : null, k === 'all' ? 'All' : KIND[k], h('em'))));
+  const small = h('button', { type: 'button', class: 'switch', role: 'switch', 'aria-checked': 'true' },
+    h('span', { class: 'lab' }, 'Small changes'), h('span', { class: 'track' }, h('span', { class: 'knob' })));
+  const filters = h('div', { class: 'log-f' },
+    h('div', { class: 'frow' }, h('span', { class: 'lab' }, 'Version'), vDots),
+    h('div', { class: 'frow' }, h('span', { class: 'lab' }, 'Kind'), kChips),
+    small);
+
+  // ---- the strip: every change as a tick, taller for bigger ones, the versions under it; click one to go to it
+  const x = (i: number) => `${(i / (all.length - 1)) * 100}%`;
+  const strip = h('div', { class: 'strip' });
+  for (const e of all) strip.append(h('button', { type: 'button', class: `tk s${e.size}`, style: `left:${x(e.n - 1)}`, 'data-n': String(e.n), title: `#${e.n} · ${e.title}`, 'aria-label': `Go to change ${e.n}, ${e.title}` }));
   for (const [vi, v] of VERSIONS.entries()) {
-    const idx = all.filter((e) => e.version === v.id).map((e) => e.n - 1);
-    const a = Math.min(...idx), b = Math.max(...idx);
-    strip.append(h('div', { class: `vb${v.id === current ? ' cur' : ''}`, style: `left:${x(a)};width:calc(${((b - a) / (all.length - 1)) * 100}%)` },
-      h('span', null, v.id, h('span', { class: 'nm' }, ` · ${v.name}`))));
-    // where one version hands over to the next: halfway between its last change and the next one's first
-    if (vi) strip.append(h('div', { class: 'cut', style: `left:calc(${((a - 0.5) / (all.length - 1)) * 100}%)` }, h('span', null, `${v.id} begins`)));
+    const idx = all.filter((e) => e.version === v.id).map((e) => e.n - 1), a = Math.min(...idx), b = Math.max(...idx);
+    strip.append(h('div', { class: `vb${v.id === current ? ' cur' : ''}`, style: `left:${x(a)};right:calc(100% - ${x(b)})` }, h('span', null, v.id)));
+    if (vi) strip.append(h('div', { class: 'cut', style: `left:${x(a - 0.5)}` }));
   }
 
-  // ---- the ledger: versions newest first, each change a row on the rail
-  const row = (e: (typeof all)[number]) => h('li', { class: 'row', id: `log-${e.n}`, 'data-n': String(e.n) },
-    h('span', { class: 'no' }, `#${String(e.n).padStart(2, '0')}`),
-    h('span', { class: 'm' }, h('span', { class: 'at' }, stamp(e.at)), h('span', { class: `node k-${e.kind} s${e.size}`, 'aria-hidden': 'true' }),
-      h('span', { class: `kind k-${e.kind}` }, KIND[e.kind]), sizeBars(e.size)),
-    h('div', { class: 'what' }, h('b', null, e.title), h('span', null, e.text)),
-    h('span', { class: 'ref' },
-      e.commit ? h('a', { href: `${REPO}/commit/${e.commit}`, target: '_blank', rel: 'noopener' }, e.commit) : h('span', { class: 'here' }, 'this release'),
+  // ---- the list
+  const list = h('div', { class: 'log-l' });
+  const empty = h('div', { class: 'empty' }, h('p', null, 'No changes match.'), h('button', { type: 'button', class: 'btn' }, 'Show everything'));
+  const item = (e: E) => h('li', { class: `e s${e.size}`, id: `log-${e.n}` },
+    h('span', { class: `node k-${e.kind}`, 'aria-hidden': 'true' }),
+    h('div', { class: 'eh' }, h('span', { class: 'kind' }, KIND[e.kind]), h('span', { class: 'at' }, stamp(e.at))),
+    h('b', null, e.title), h('p', null, e.text),
+    h('div', { class: 'ef' }, h('span', null, `#${String(e.n).padStart(2, '0')}`),
+      e.commit ? h('a', { href: `${REPO}/commit/${e.commit}`, target: '_blank', rel: 'noopener' }, e.commit) : h('span', null, 'this release'),
       e.tag ? h('em', { class: 'tag' }, e.tag) : null));
 
-  const book = h('div', { class: 'book' });
-  const order = [...VERSIONS].reverse();
-  for (const [oi, v] of order.entries()) {
-    const list = all.filter((e) => e.version === v.id), first = list[0], last = list[list.length - 1];
-    const vtags = list.filter((e) => e.tag).map((e) => e.tag!);
-    const isCur = v.id === current, next = order[oi - 1];
-    const lastTag = vtags[vtags.length - 1];
-    book.append(h('section', { class: `ver${isCur ? ' cur' : ''}`, 'aria-label': `Version ${v.id}` },
-      // its top edge: where it ends (or that it is still open), since the ledger reads newest first
-      h('div', { class: 'edge end' }, h('span', null, isCur ? `▼ ${v.id} open` : `▼ ${v.id} ends`), h('span', null, stamp(last.at)),
-        h('span', null, isCur ? 'the latest change' : `${lastTag ? lastTag + ' · ' : ''}before ${next!.id}`)),
-      h('header', { class: 'vh' },
-        h('div', { class: 'vid' }, h('span', { class: 'vn' }, v.id), h('span', { class: 'vname' }, v.name), h('span', { class: 'vstate' }, isCur ? 'current · open' : 'closed')),
-        h('div', { class: 'meta' }, dl([
-          ['Opened', stamp(first.at)], ['Closed', isCur ? '—' : stamp(last.at)], ['Tags', vtags.length ? vtags.join(' · ') : '—'],
-          ['Changes', `${list.length}`], ['Mix', `${count(list, 'new')} new · ${count(list, 'improved')} improved · ${count(list, 'fixed')} fixed · ${count(list, 'system')} system`],
-        ])),
-        h('figure', null, h('img', { src: v.fig, alt: `The bench in version ${v.id}`, loading: 'lazy', width: '880', height: '495' }), h('figcaption', null, h('b', null, `Fig. ${v.id}`), ' ', v.caption))),
-      h('ol', { class: 'rows', reversed: '' }, ...[...list].reverse().map(row)),
-      h('div', { class: 'edge' }, h('span', null, `▲ ${v.id} begins`), h('span', null, stamp(first.at)), h('span', null, oi === order.length - 1 ? 'the first commit' : `after ${order[oi + 1].id}`))));
+  function paint() {
+    const vis = all.filter(shown);
+    sum.textContent = vis.length === all.length ? `${all.length} changes · ${VERSIONS.length} versions` : `${vis.length} of ${all.length} changes`;
+    // each kind's count, inside the version and sizes chosen
+    for (const c of kChips.querySelectorAll<HTMLElement>('.chip')) {
+      const k = c.dataset.v as Kind | 'all';
+      c.querySelector('em')!.textContent = String(all.filter((e) => inVersion(e) && (f.small || e.size > 1) && (k === 'all' || e.kind === k)).length);
+      c.setAttribute('aria-pressed', String(f.kind === k));
+    }
+    for (const t of strip.querySelectorAll<HTMLElement>('.tk')) t.classList.toggle('off', !shown(all[+t.dataset.n! - 1]));
+    const order = [...VERSIONS].reverse();
+    const sections = order.flatMap((v, oi) => {
+      const mine = all.filter((e) => e.version === v.id), rows = mine.filter(shown);
+      if (!rows.length) return [];
+      const first = mine[0], last = mine[mine.length - 1], isCur = v.id === current, tags = mine.filter((e) => e.tag).map((e) => e.tag!);
+      const prev = order[oi + 1];
+      return [h('section', { class: `ver${isCur ? ' cur' : ''}`, 'aria-label': `Version ${v.id}` },
+        // pinned while you read it, so you always know which version you are in
+        h('header', { class: 'vh' },
+          h('span', { class: 'vn' }, v.id),
+          h('span', { class: 'vname' }, v.name),
+          h('span', { class: 'vr' }, isCur ? 'now' : 'closed')),
+        h('dl', { class: 'vmeta' },
+          h('dt', null, 'From'), h('dd', null, stamp(first.at)), h('dt', null, 'To'), h('dd', null, isCur ? 'open' : stamp(last.at)),
+          h('dt', null, 'Changes'), h('dd', null, String(mine.length)), h('dt', null, 'Tags'), h('dd', null, tags.length ? tags.join(' · ') : '—')),
+        h('figure', null, h('img', { src: v.fig, alt: `The bench in version ${v.id}`, loading: 'lazy', width: '880', height: '495' }), h('figcaption', null, v.caption)),
+        h('ol', { class: 'rows' }, ...[...rows].reverse().map(item)),
+        h('div', { class: 'vstart' }, h('span', null, `${v.id} begins`), h('span', null, prev ? `after ${prev.id}` : 'the first change')))];
+    });
+    list.replaceChildren(...(sections.length ? sections : [empty]));
   }
 
-  drawer.replaceChildren(head, h('div', { class: 'scroll' }, h('div', { class: 'strip-w' }, strip, read), book));
+  const paintV = dots(vDots, { get: () => f.version, set: (v) => { f.version = v; paint(); } });
+  const paintS = toggle(small, { get: () => f.small, set: (v) => { f.small = v; paint(); } });
+  kChips.addEventListener('click', (e) => { const b = (e.target as Element).closest<HTMLElement>('.chip'); if (b) { f.kind = b.dataset.v as Kind | 'all'; paint(); } });
+  empty.querySelector('button')!.addEventListener('click', reset);
+  // a tick takes you to its change, clearing the filters if they hide it
+  strip.addEventListener('click', (ev) => {
+    const t = (ev.target as Element).closest<HTMLElement>('.tk'); if (!t) return;
+    const e = all[+t.dataset.n! - 1];
+    if (!shown(e)) reset();
+    const row = document.getElementById(`log-${e.n}`)!;
+    row.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+    row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
+  });
 
-  // ---- hover a tick: its row lights up and the readout names it; click it to go to its row
-  const rows = new Map([...drawer.querySelectorAll<HTMLElement>('.row')].map((r) => [r.dataset.n!, r]));
-  const ticks = new Map([...strip.querySelectorAll<HTMLElement>('.tk')].map((t) => [t.dataset.n!, t]));
-  const light = (n: string | null) => {
-    for (const [k, r] of rows) r.classList.toggle('hl', k === n);
-    for (const [k, t] of ticks) t.classList.toggle('hl', k === n);
-    const e = n ? all[+n - 1] : null;
-    read.textContent = e ? `#${String(e.n).padStart(2, '0')} · ${stamp(e.at)} · ${e.version} · ${e.title}` : 'Hover a tick';
-  };
-  strip.addEventListener('pointerover', (ev) => { const t = (ev.target as Element).closest<HTMLElement>('.tk'); if (t) light(t.dataset.n!); });
-  strip.addEventListener('pointerleave', () => light(null));
-  strip.addEventListener('click', (ev) => { const t = (ev.target as Element).closest<HTMLElement>('.tk'); if (t) rows.get(t.dataset.n!)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
-  for (const r of rows.values()) { r.addEventListener('pointerenter', () => light(r.dataset.n!)); r.addEventListener('pointerleave', () => light(null)); }
+  drawer.replaceChildren(head, h('div', { class: 'log-s' }, filters, strip, list));
+  paint();
 
-  // ---- open and close: the rest of the page is out of reach while it is down
-  const behind = () => [...document.body.children].filter((c) => c !== drawer && c !== scrim && c.tagName !== 'SCRIPT') as HTMLElement[];
+  // ---- open and close: the bench eases back, out of reach, while the drawer is in
   drawer.inert = true;
+  const isOpen = () => document.body.classList.contains('logopen');
   const open = () => {
-    if (drawer.classList.contains('open')) return;
-    drawer.inert = false; drawer.classList.add('open'); scrim.classList.add('on');
+    if (isOpen()) return;
+    drawer.inert = false; page.inert = true;
+    document.body.classList.add('logopen');
     btn.setAttribute('aria-expanded', 'true');
-    for (const c of behind()) c.inert = true;
     setTimeout(() => drawer.focus({ preventScroll: true }), 60);
   };
   const shut = () => {
-    if (!drawer.classList.contains('open')) return;
-    drawer.classList.remove('open'); scrim.classList.remove('on');
+    if (!isOpen()) return;
+    document.body.classList.remove('logopen');
     btn.setAttribute('aria-expanded', 'false');
-    for (const c of behind()) c.inert = false;
-    drawer.inert = true;
+    drawer.inert = true; page.inert = false;
     btn.focus({ preventScroll: true });
   };
-  btn.addEventListener('click', () => (drawer.classList.contains('open') ? shut() : open()));
+  btn.addEventListener('click', () => (isOpen() ? shut() : open()));
   close.addEventListener('click', shut);
   scrim.addEventListener('click', shut);
-  // keys stay in the drawer: Esc closes it, and the bench's own keys (space, r, zoom) wait until it is up
+  // keys stay in the drawer: Esc closes it, and the bench's own keys (space, r, zoom) wait until it is closed
   drawer.addEventListener('keydown', (e) => { if (e.key === 'Escape') { shut(); e.preventDefault(); } e.stopPropagation(); });
 }

@@ -97,5 +97,5 @@ export const ENTRIES: Entry[] = [
     text: 'Over a dial or a ring, scroll up for more and down for less: a mouse wheel, or two fingers on a trackpad.' },
   { at: '2026-11-03T18:45', version: '001.B', kind: 'new', size: 2,
     title: 'This change log',
-    text: 'Hover the version in the title for the log button: every change, the smallest to the biggest, version by version.' },
+    text: 'Hover the version in the title for its button: a side drawer of every change, filtered by version, kind and size.' },
 ];

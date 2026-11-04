@@ -83,8 +83,8 @@ Every change gets an entry in `src/bench/changelog.ts`, in the same commit: olde
 version it ships in, its kind (new · improved · fixed · system) and size (1 a detail, 2 a feature, 3 a step), a title
 of what people get (≤ 48 characters) and one line (≤ 200). Fill in `commit` for earlier entries once their hash
 exists; the newest can leave it out ("this release"). A new version adds a `VERSIONS` row with a frame of the bench
-(`src/bench/img/<id>.jpg`, 880 px wide). `test/changelog.test.ts` keeps it in order. The drawer is `src/bench/log.ts`:
-hover the version in the title for its button.
+(`src/bench/img/<id>.jpg`, 880 px wide). `test/changelog.test.ts` keeps it in order. The drawer is `src/bench/log.ts`, a side drawer:
+hover the version in the title for its button; opening it eases the page back with one CSS scale on `#page`.
 
 ## Known gaps / next
 

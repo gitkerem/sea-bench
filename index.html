@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+<div class="page" id="page">
 <canvas id="c" aria-label="Water column, FFT sea simulation"></canvas>
 
 <header class="hdr">
@@ -22,8 +23,6 @@
     <dl><dt>Time</dt><dd id="vTime">T+00:00</dd><dt>Rate</dt><dd id="vFps">60 fps</dd><dt>Grid</dt><dd id="vGrid">128² · 3 cascades</dd><dt>Wind</dt><dd id="vWind">12 kn from E</dd><dt>Seed</dt><dd id="vSeed">1</dd></dl>
   </div>
 </header>
-<div class="logscrim" id="logScrim"></div>
-<section class="log" id="log" role="dialog" aria-modal="true" aria-labelledby="logTitle" tabindex="-1"></section>
 <div class="theme"><button type="button" id="bTheme" role="switch" aria-checked="false" aria-label="Dark mode"><span class="w">Light</span><span class="track"><span class="knob"></span></span></button></div>
 
 <div class="keys" aria-hidden="true"><div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>grid 1 m · heavy line 5 m<br>space pause · r new sea · drag to peek · scroll or pinch to zoom · double-click to reset</div>
@@ -95,6 +94,9 @@
 
 
 <div id="nogpu"><div><h2>This needs WebGPU</h2><p>The sea is simulated with compute shaders. Open this page in Chrome or Edge, or Safari 26 on macOS and iOS.</p></div></div>
+</div>
+<div class="logscrim" id="logScrim"></div>
+<aside class="log" id="log" role="dialog" aria-modal="true" aria-labelledby="logTitle" tabindex="-1"></aside>
 <script type="module" src="/src/bench/main.ts"></script>
 </body>
 </html>
