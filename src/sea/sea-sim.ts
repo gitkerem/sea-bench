@@ -16,7 +16,7 @@ import { Fn, uint, vec2, vec4, uvec2, instanceIndex, instancedArray, textureStor
 import { CASCADES, DEFAULT_SEA, G, seaStats, type Cascade, type SeaParams, type SeaStats } from './spectrum';
 import { makeSeaUniforms, writeSeaUniforms, type SeaUniforms } from './uniforms';
 import { spectrumTSL, gauss2TSL, freqIndexTSL } from './tsl-spectrum';
-import { buildComponents, heightAt, type WaveComponent } from './sea-cpu';
+import { buildComponents, surfaceAt, type WaveComponent } from './sea-cpu';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type N = any;
@@ -168,8 +168,9 @@ export class SeaSim {
 
   get time(): number { return this.U.tSim.value; }
 
-  /** Height of the sea at world (x, z), metres above mean level, from the strongest wave pairs — same spectrum as the GPU. */
+  /** Height of the surface you see at world (x, z), metres above mean level, chop included, from the strongest wave
+   *  pairs — same spectrum as the GPU. */
   heightAt(x: number, z: number, t = this.U.tSim.value): number {
-    return heightAt(this.comps, x + this.U.off.value.x, z + this.U.off.value.y, t);
+    return surfaceAt(this.comps, x + this.U.off.value.x, z + this.U.off.value.y, t, this.U.lambda.value);
   }
 }

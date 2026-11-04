@@ -25,7 +25,7 @@ src/sea/              the reusable sea — no DOM, no bench knowledge
   tsl-spectrum.ts     the TSL twins of the two files above — keep them in step
   uniforms.ts         SeaUniforms: what the GPU reads
   sea-sim.ts          SeaSim: h0 → evolve → Stockham passes → (Dx,h,Dz) textures, per cascade, per frame
-  sea-cpu.ts          strongest ±k pairs from the same seeded spectrum; heightAt(), slopeAt()
+  sea-cpu.ts          strongest ±k pairs from the same seeded spectrum; heightAt(), displacementAt(), surfaceAt(), slopeAt()
   shading.ts          Look uniforms + materials: surface, wall, seabed, rocks, ground
   column.ts           SeaColumn: the geometry wired to the materials (one Group)
   fft-reference.ts    the pipeline in plain JS — the oracle for the tests, not used at runtime

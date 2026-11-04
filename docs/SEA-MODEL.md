@@ -53,8 +53,14 @@ larger scales.
 
 For each of the two coarse cascades, every ±k pair's amplitude `|h0(k)| + |h0(−k)|` is computed from the same seeded
 spectrum, the strongest 140 kept, and `h(x,z,t) = Σ 2·Re[ĥ(k,t) e^{i k·x}]`. 280 pairs × 5 hull points × 120 Hz is
-nothing. It ignores the chop displacement (sample at the undisplaced point; the error is ≤ λ·|D| ≈ 0.3 m
-horizontally, which a boat doesn't notice).
+nothing.
+
+`heightAt` on the sea reads the surface you see, chop included (`surfaceAt`). The drawn surface is the field moved
+sideways by λ·D, with `D̂ = i·(k/|k|)·ĥ` summed from the same pairs (`displacementAt`, checked against evolve + ifft
+in `test/sea-cpu.test.ts`). The water over (x, z) came from q with q + λ·D(q) = (x, z), found in four fixed-point
+steps. Reading straight down instead misses the drawn surface by ~9 cm in a moderate sea and ~30 cm in a storm
+(crests move up to λ·|D| ≈ 0.3–1 m sideways); four steps bring that to under 1 mm and ~4 cm. The plain field
+height at its own coordinates is still `heightAt(comps, …)` in `sea-cpu.ts`.
 
 ## Conventions
 

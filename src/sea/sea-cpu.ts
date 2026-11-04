@@ -34,7 +34,8 @@ export function buildComponents(p: SeaParams, N: number, cascades: Cascade[], se
   return out;
 }
 
-/** Σ over pairs of 2·Re[ĥ(k,t) e^{ik·x}], the same evolution the GPU runs. */
+/** Σ over pairs of 2·Re[ĥ(k,t) e^{ik·x}], the same evolution the GPU runs. The height of the wave field at its own
+ *  coordinates, before the chop moves it sideways: what `surfaceAt` reads once it has found where to look. */
 export function heightAt(comps: WaveComponent[], x: number, z: number, t: number): number {
   let h = 0;
   for (const c of comps) {
@@ -45,10 +46,35 @@ export function heightAt(comps: WaveComponent[], x: number, z: number, t: number
   return h;
 }
 
-/** Central-difference slope of the CPU sea, for pitch and roll: returns (∂h/∂x, ∂h/∂z). */
-export function slopeAt(comps: WaveComponent[], x: number, z: number, t: number, e = 0.25): [number, number] {
+/** (Dx, h, Dz) at the wave field's own coordinates, packed like the GPU cascade texture. The horizontal part is
+ *  D̂ = i·(k/|k|)·ĥ, as the evolve kernel builds it: water is carried toward the crest it is under. */
+export function displacementAt(comps: WaveComponent[], x: number, z: number, t: number): [number, number, number] {
+  let dx = 0, h = 0, dz = 0;
+  for (const c of comps) {
+    const ct = Math.cos(c.w * t), st = Math.sin(c.w * t);
+    const hr = c.ar * ct + c.ai * st + c.pr * ct + c.qi * st, hi = c.ai * ct - c.ar * st + c.pr * st - c.qi * ct, ph = c.kx * x + c.kz * z;
+    const cp = Math.cos(ph), sp = Math.sin(ph), re = hr * cp - hi * sp, im = hr * sp + hi * cp, k = Math.hypot(c.kx, c.kz);
+    h += 2 * re;
+    if (k > 0) { dx -= 2 * im * c.kx / k; dz -= 2 * im * c.kz / k; }
+  }
+  return [dx, h, dz];
+}
+
+/** Height of the surface you see at (x, z), chop included. The drawn surface is the field moved sideways by
+ *  λ·D, so the water over (x, z) came from the point q with q + λ·D(q) = (x, z); fixed-point steps find it, as
+ *  the column wall does on the GPU. The wall's two are plenty for a colour; a hull gets four (within a millimetre
+ *  in a moderate sea, a few centimetres on a breaking storm crest), so it rides the crest drawn under it. */
+export function surfaceAt(comps: WaveComponent[], x: number, z: number, t: number, lambda: number): number {
+  if (lambda === 0) return heightAt(comps, x, z, t);
+  let qx = x, qz = z;
+  for (let i = 0; i < 4; i++) { const [dx, , dz] = displacementAt(comps, qx, qz, t); qx = x - lambda * dx; qz = z - lambda * dz; }
+  return heightAt(comps, qx, qz, t);
+}
+
+/** Central-difference slope of the visible surface, for pitch and roll: returns (∂h/∂x, ∂h/∂z). */
+export function slopeAt(comps: WaveComponent[], x: number, z: number, t: number, lambda = 0, e = 0.25): [number, number] {
   return [
-    (heightAt(comps, x + e, z, t) - heightAt(comps, x - e, z, t)) / (2 * e),
-    (heightAt(comps, x, z + e, t) - heightAt(comps, x, z - e, t)) / (2 * e),
+    (surfaceAt(comps, x + e, z, t, lambda) - surfaceAt(comps, x - e, z, t, lambda)) / (2 * e),
+    (surfaceAt(comps, x, z + e, t, lambda) - surfaceAt(comps, x, z - e, t, lambda)) / (2 * e),
   ];
 }
