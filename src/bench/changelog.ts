@@ -5,6 +5,7 @@
  */
 import figV040 from './img/v0.4.0.jpg';
 import figV052 from './img/v0.5.2.jpg';
+import figV060 from './img/v0.6.0.jpg';
 
 /** what kind of change: something new, something better, something mended, or the bench around the sea */
 export type Kind = 'new' | 'improved' | 'fixed' | 'system';
@@ -49,6 +50,7 @@ export const VERSIONS: Version[] = [
   { id: 'v0.5.1', name: 'the version in the title' },
   { id: 'v0.5.2', name: 'one typeface, and this log', fig: figV052, caption: 'The same sea on the shared instrument panel, set in Space Mono.' },
   { id: 'v0.5.3', name: 'the dinghy’s depth' },
+  { id: 'v0.6.0', name: 'weather in the column', fig: figV060, caption: 'Rain from a mostly overcast deck: grey water, rings where the drops land.' },
 ];
 
 export const ENTRIES: Entry[] = [
@@ -118,4 +120,7 @@ export const ENTRIES: Entry[] = [
   { at: '2026-11-03T20:50', version: 'v0.5.3', kind: 'improved', size: 2,
     title: 'Water as deep as the dinghy’s',
     text: '3.8 m in the column, up from 1.7 m: the sea the boat sails on, and the default for any scene.' },
+  { at: '2026-11-04T00:45', version: 'v0.6.0', kind: 'new', size: 3,
+    title: 'Weather over the sea',
+    text: 'Cloud, rain in shafts, fog and lightning inside the column, and a squall you can send through.' },
 ];

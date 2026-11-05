@@ -1,6 +1,6 @@
 {
   "name": "sea-bench",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "private": true,
   "description": "A real sea in a cut-away column: JONSWAP spectrum → FFT on the GPU (three.js WebGPU + TSL), the same spectrum summed on the CPU for anything that floats. Plus the bench that tunes it.",
   "license": "MIT",

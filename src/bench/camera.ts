@@ -9,8 +9,11 @@ export class BenchCamera {
   private drag: { x: number; y: number; yaw: number; el: number } | null = null;
   private pinch: { d0: number; z0: number } | null = null;
   private readonly pts = new Map<number, { x: number; y: number }>();
+  /** where the frame is easing to: the point it centres on and the radius it fits (see frameTo) */
+  private readonly goal: { y: number; r: number };
 
-  constructor(private readonly canvas: HTMLCanvasElement, private readonly target: THREE.Vector3, private readonly fitRadius: number, private readonly panelWidth: () => number) {
+  constructor(private readonly canvas: HTMLCanvasElement, private readonly target: THREE.Vector3, private fitRadius: number, private readonly panelWidth: () => number) {
+    this.goal = { y: target.y, r: fitRadius };
     canvas.addEventListener('pointerdown', (e) => {
       this.pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); canvas.setPointerCapture(e.pointerId);
       if (this.pts.size === 2) { const [a, b] = [...this.pts.values()]; this.pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y), z0: this.view.zoom }; this.drag = null; }
@@ -35,6 +38,15 @@ export class BenchCamera {
       if (e.key === '-' || e.key === '_') this.setZoom(this.view.zoom / 1.15);
     });
     this.resize();
+  }
+
+  /** Ease the frame to centre on height `y` and fit radius `r`: the weather's cloud stands above the column, so the
+   *  view backs off to take it in, and comes back when the sky clears. Call step() every frame. */
+  frameTo(y: number, r: number): void { this.goal.y = y; this.goal.r = r; }
+  step(dt: number): void {
+    const k = 1 - Math.exp(-dt * 2.2), dy = this.goal.y - this.target.y, dr = this.goal.r - this.fitRadius;
+    if (Math.abs(dy) < 1e-3 && Math.abs(dr) < 1e-3) return;
+    this.target.y += dy * k; this.fitRadius += dr * k; this.place();
   }
 
   setZoom(z: number): void { this.view.zoom = THREE.MathUtils.clamp(z, 0.5, 3); this.place(); }

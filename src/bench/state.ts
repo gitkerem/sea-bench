@@ -3,12 +3,15 @@ export interface BenchState {
   windKn: number; fetchKm: number; spread: number; gamma: number; height: number; ripple: number;
   swellH: number; swellT: number; swellOff: number; windFrom: number; chop: number;
   sunEl: number; sunAz: number; tod: number; sunManual: boolean; glint: number; clarity: number; timeK: number;
+  /** weather, each 0 … 1: cloud cover, rain, fog, lightning */
+  cloud: number; rain: number; fog: number; lightning: number;
 }
 
 export const DEFAULTS: BenchState = {
   windKn: 12, fetchKm: 12, spread: 2, gamma: 3.3, height: 1, ripple: 1,
   swellH: 0, swellT: 6, swellOff: 35, windFrom: 90, chop: 1.15,
   sunEl: 37, sunAz: -100, tod: 14.5, sunManual: false, glint: 1, clarity: 1, timeK: 1,
+  cloud: 0, rain: 0, fog: 0, lightning: 0,
 };
 
 export const PRESETS: Record<string, Partial<BenchState>> = {
@@ -17,6 +20,17 @@ export const PRESETS: Record<string, Partial<BenchState>> = {
   fresh:    { windKn: 18, fetchKm: 16, spread: 2, gamma: 3.3, height: 1,   ripple: 1.2, swellH: 0.2, chop: 1.35 },
   storm:    { windKn: 28, fetchKm: 30, spread: 3, gamma: 4.5, height: 1.1, ripple: 1.4, swellH: 0.5, chop: 1.6 },
 };
+
+/** The weather row: a few skies, each a setting of the four weather sliders. */
+export const WEATHER: Record<string, Pick<BenchState, 'cloud' | 'rain' | 'fog' | 'lightning'>> = {
+  clear: { cloud: 0,    rain: 0,    fog: 0,    lightning: 0 },
+  rain:  { cloud: 0.9,  rain: 0.65, fog: 0.1,  lightning: 0 },
+  storm: { cloud: 1,    rain: 1,    fog: 0.15, lightning: 0.7 },
+  fog:   { cloud: 0.5,  rain: 0,    fog: 1,    lightning: 0 },
+};
+
+/** The weather's name if the sliders sit on one of the presets, else ''. */
+export const weatherName = (s: BenchState) => Object.keys(WEATHER).find((k) => (['cloud', 'rain', 'fog', 'lightning'] as const).every((f) => Math.abs(WEATHER[k][f] - s[f]) < 0.005)) ?? '';
 
 /** State from the URL (?p=…), or the defaults. */
 export function loadState(): { state: BenchState; fromUrl: boolean } {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sea bench · v0.05.3</title>
+<title>Sea bench · v0.06.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -14,11 +14,11 @@
 
 <header class="hdr">
   <div class="tline">
-    <h1 class="title" id="title">Sea bench <span class="v">v0<i class="pt">.</i>05<i class="pt">.</i>3</span></h1>
+    <h1 class="title" id="title">Sea bench <span class="v">v0<i class="pt">.</i>06<i class="pt">.</i>0</span></h1>
     <button type="button" class="logbtn" id="bLog" aria-expanded="false" aria-controls="log">Changelog</button>
   </div>
   <div class="meta" aria-hidden="true">
-    <dl><dt>Version</dt><dd class="ver">v0<i class="pt">.</i>05<i class="pt">.</i>3</dd><dt>System</dt><dd>01 · water column</dd><dt>Date</dt><dd>Nov 3, 2026</dd><dt>By</dt><dd>K &amp; Co</dd><dt>Engine</dt><dd>WebGPU · three r186</dd></dl>
+    <dl><dt>Version</dt><dd class="ver">v0<i class="pt">.</i>06<i class="pt">.</i>0</dd><dt>System</dt><dd>01 · water column</dd><dt>Date</dt><dd>Nov 4, 2026</dd><dt>By</dt><dd>K &amp; Co</dd><dt>Engine</dt><dd>WebGPU · three r186</dd></dl>
     <dl><dt>State</dt><dd class="red" id="vState">moderate sea</dd><dt>Hs</dt><dd id="vHs">0.40 m</dd><dt>Tp</dt><dd id="vTp">2.5 s</dd><dt><span style="text-transform:none">λ</span>p</dt><dd id="vLp">10 m</dd><dt>Steepness</dt><dd id="vSteep">1/25</dd></dl>
     <dl><dt>Time</dt><dd id="vTime">T+00:00</dd><dt>Rate</dt><dd id="vFps">60 fps</dd><dt>Grid</dt><dd id="vGrid">128² · 3 cascades</dd><dt>Wind</dt><dd id="vWind">12 kn from E</dd><dt>Seed</dt><dd id="vSeed">1</dd></dl>
   </div>
@@ -38,6 +38,17 @@
       </div>
       <div id="slSunEl"></div><div id="slSunAz"></div>
       <p class="hint">Moving the sun by hand takes it off the clock; turn the clock to put it back.</p>
+    </div></div>
+  </section>
+  <section class="folder" id="fWeather">
+    <button class="fh" type="button" aria-expanded="true">Weather <span class="c" id="wxTag">clear</span><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg></button>
+    <div class="fb"><div>
+      <nav class="dots" id="segWeather" aria-label="Weather presets">
+        <button type="button" data-v="clear" aria-pressed="true">Clear</button><button type="button" data-v="rain">Rain</button><button type="button" data-v="storm">Storm</button><button type="button" data-v="fog">Fog</button>
+      </nav>
+      <div id="slCloud"></div><div id="slRain"></div><div id="slFog"></div><div id="slLightning"></div>
+      <div class="btns"><button class="btn" type="button" id="bSquall">Squall</button><button class="btn" type="button" id="bStrike">Strike</button></div>
+      <p class="hint">A squall shows as a dark line on the water upwind before its wind and rain arrive.</p>
     </div></div>
   </section>
   <section class="folder" id="fSea">

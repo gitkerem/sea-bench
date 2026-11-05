@@ -48,6 +48,12 @@ export interface Look {
    *  covers, the way the sea's `off` is the water it covers; with a current running the two part company.
    *  SeaColumn.setBedOffset sets it and slides the rocks along with it. */
   bedOff: U<THREE.Vector2>;
+  /** How much of the sky is cloud, 0 clear … 1 a full deck. Under a deck the water reflects grey (`overcastCol`)
+   *  instead of the paper and the blue, the sun's glint and glow go, and the caustics on the sand fade: there is no
+   *  direct sun left to focus. SeaWeather sets it; 0 (the default) is the sea as it always was. */
+  overcast: U;
+  /** the underside of the deck, as the water reflects it */
+  overcastCol: U<THREE.Color>;
 }
 
 export function makeLook(): Look {
@@ -56,6 +62,7 @@ export function makeLook(): Look {
     sunDir: uniform(new THREE.Vector3(-0.78, 0.60, -0.17).normalize()), sunCol: uniform(new THREE.Color(1.0, 0.94, 0.82)),
     glint: uniform(1), clarity: uniform(1), murk: uniform(0.3), hs: uniform(0.4), dark: uniform(0), radius: uniform(7), waterY: uniform(0),
     gustMap: texture(NO_GUST), gust: uniform(0), bedOff: uniform(new THREE.Vector2()),
+    overcast: uniform(0), overcastCol: uniform(new THREE.Color('#8d969b')),
   };
 }
 
@@ -87,10 +94,12 @@ export function makeSeaNormal(sea: SeaSim) {
   };
 }
 
-/** The studio "sky" the water reflects: paper at the horizon, cool zenith, a glow around the sun. */
+/** The studio "sky" the water reflects: paper at the horizon, cool zenith, a glow around the sun. Under cloud it is
+ *  the deck's grey, a shade lighter overhead, and the sun's glow is gone. */
 export const skyColor = (look: Look, dir: N): N => {
-  const t = pow(clamp(dir.y, 0, 1), 0.55), base = mix(look.sceneCol.mul(0.92), look.zenith, t);
-  return base.add(look.sunCol.mul(pow(max(dot(dir, look.sunDir), 0), 14).mul(0.9)));
+  const t = pow(clamp(dir.y, 0, 1), 0.55), clear = mix(look.sceneCol.mul(0.92), look.zenith, t);
+  const deck = look.overcastCol.mul(t.mul(0.25).add(0.85)), base = mix(clear, deck, look.overcast);
+  return base.add(look.sunCol.mul(pow(max(dot(dir, look.sunDir), 0), 14).mul(0.9)).mul(look.overcast.oneMinus()));
 };
 
 /** The sea surface: a plane displaced by the cascades, clipped to the column, Fresnel + crest glow + GGX glints. */
@@ -109,14 +118,14 @@ export function makeSurfaceMaterial(sea: SeaSim, look: Look): THREE.MeshBasicNod
     const deep = mix(vec3(0.010, 0.060, 0.080), vec3(0.055, 0.105, 0.105), look.murk);
     const scatter = mix(vec3(0.060, 0.330, 0.320), vec3(0.120, 0.300, 0.250), look.murk);
     const hRel = p.y.sub(look.waterY).div(look.hs.add(0.08));
-    const sss = clamp(hRel.mul(0.55).add(0.25), 0, 1).mul(NdotL.mul(0.5).add(0.5)).mul(look.dark.oneMinus().mul(0.7).add(0.3));
+    const sss = clamp(hRel.mul(0.55).add(0.25), 0, 1).mul(NdotL.mul(0.5).add(0.5)).mul(look.dark.oneMinus().mul(0.7).add(0.3)).mul(look.overcast.mul(0.45).oneMinus());
     const g = look.gustMap.sample(vBase.div(look.radius.mul(2)).add(0.5)).r, gw = look.gust;   // 0 light air … 1 gust
     const body = deep.add(scatter.mul(sss)).mul(mix(float(1), mix(1.1, 0.72, g), gw));
     const H = normalize(L.add(V)), NdotH = max(dot(n, H), 0), rough = float(0.085).add(g.mul(0.04).mul(gw)), a2 = rough.mul(rough).mul(rough).mul(rough);
     const dd = NdotH.mul(NdotH).mul(a2.sub(1)).add(1), D = a2.div(dd.mul(dd).mul(Math.PI)), VdotH = max(dot(V, H), 0);
     const Fs = float(0.02).add(pow(VdotH.oneMinus(), 5).mul(0.98));
     const spec = D.mul(Fs).mul(NdotL).mul(0.32).mul(look.glint).mul(mix(float(1), mix(1, 0.6, g), gw)), sheen = pow(NdotH, 24).mul(NdotL).mul(0.10).mul(look.glint.mul(0.5).add(0.5));
-    return vec4(mix(body, sky, Fr).add(look.sunCol.mul(spec.add(sheen))), 1);
+    return vec4(mix(body, sky, Fr).add(look.sunCol.mul(spec.add(sheen)).mul(look.overcast.mul(0.92).oneMinus())), 1);
   })();
   return mat;
 }
@@ -143,8 +152,9 @@ export function makeUnderwater(sea: SeaSim, look: Look) {
     const cw = xz.add(sea.U.off);
     const c1 = mx_worley_noise_float(vec3(cw.mul(0.55), sea.U.tSim.mul(0.25)));
     const c2 = mx_worley_noise_float(vec3(cw.mul(0.85).add(3.7), sea.U.tSim.mul(0.19).add(5.0)));
-    const caust = c1.mul(c2).mul(2.2).mul(NdotL).mul(mix(1.4, 0.6, smoothstep(0.7, 1.7, depth)));
-    const lit = albedo.mul(n.y.mul(0.25).add(0.35).add(NdotL.mul(0.75)).add(caust));
+    const sun = look.overcast.mul(0.85).oneMinus();   // under cloud the light is all sky: no caustics, no sunny side
+    const caust = c1.mul(c2).mul(2.2).mul(NdotL).mul(mix(1.4, 0.6, smoothstep(0.7, 1.7, depth))).mul(sun);
+    const lit = albedo.mul(n.y.mul(0.25).add(0.35).add(NdotL.mul(0.75).mul(sun)).add(look.overcast.mul(0.18)).add(caust));
     const trans = exp(vec3(0.38, 0.15, 0.09).mul(depth.div(look.clarity).mul(-1.6)));
     const scatter = mix(vec3(0.045, 0.22, 0.21), vec3(0.09, 0.19, 0.16), look.murk);
     return lit.mul(trans).add(scatter.mul(exp(depth.div(look.clarity).mul(-0.9)).oneMinus()));

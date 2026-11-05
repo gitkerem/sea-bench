@@ -29,7 +29,7 @@ The package exports `src/sea` as TypeScript source, for a Vite + TypeScript proj
 three as your own dependency (it is a peer, so there is only ever one copy):
 
 ```
-npm install three@0.186.0 github:gitkerem/sea-bench#v0.5.3
+npm install three@0.186.0 github:gitkerem/sea-bench#v0.6.0
 ```
 
 ```ts
@@ -68,6 +68,19 @@ sea.U.off.value.set(waterX, waterZ); // what you've covered through the water
 column.setBedOffset(groundX, groundZ); // and over the ground (they differ when a current runs)
 ```
 
+Weather inside the column, like a snow globe: a cloud deck over the water with its shadow on it, rain falling with
+rings where it lands, fog in the troughs, a squall marching through as a dark band, and lightning. The page around
+the column is untouched; under cloud the water greys and loses its glint (`look.overcast`).
+
+```ts
+const weather = new SeaWeather(sea, column, { cloudBase: 8 }); // metres above the water; clear any mast
+weather.set({ cloud: 0.9, rain: 0.6, fog: 0, lightning: 0 });   // each 0 … 1; it eases there
+weather.squall(); weather.strike();
+// per frame: the wind drifts the cloud, rain and fog and carries the squall
+weather.step(dt, { speed: windMs, travel: travelFromCompass(windFrom) });
+weather.squallHere; weather.flash;   // 0 … 1, to raise a scene's wind or brighten its lights
+```
+
 ## Versions
 
 Releases are semver git tags, `vX.Y.Z`, and the package version matches. The title and the page name show the current
@@ -83,6 +96,7 @@ one, with the minor in two digits (v0.5.2 reads v0.05.2). Every change is in the
 | v0.5.1 | the version in the title |
 | v0.5.2 | Space Mono throughout; scroll over a dial or ring to turn it; the change log; versions read v0.05.2; bare-line icons |
 | v0.5.3 | the column is 3.8 m deep, the dinghy simulator's depth, by default |
+| v0.6.0 | weather in the column: cloud, rain, fog, squalls and lightning, with their controls |
 
 ## Layout
 
